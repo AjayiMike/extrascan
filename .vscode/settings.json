@@ -1,0 +1,17 @@
+{
+    "npm.packageManager": "yarn",
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.updateImportsOnFileMove.enabled": "always",
+    "editor.formatOnSaveMode": "file",
+    "editor.tabCompletion": "on",
+    "editor.formatOnSave": true,
+    "editor.inlineSuggest.enabled": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit"
+    },
+    "files.eol": "\n",
+    "eslint.enable": true,
+    "eslint.debug": true,
+    "css.lint.unknownAtRules": "ignore",
+    "css.lint.emptyRules": "ignore"
+}
