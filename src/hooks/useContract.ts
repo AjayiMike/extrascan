@@ -1,7 +1,7 @@
-import { Contract } from "@ethersproject/contracts";
 import { useSDK } from "@metamask/sdk-react";
 import { useMemo } from "react";
-import useProvider from "./useProvider";
+import useProvider, { useSigner } from "./useProvider";
+import { Contract } from "ethers";
 
 export function useContract<T extends Contract = Contract>(
     address: string | undefined,
@@ -10,15 +10,16 @@ export function useContract<T extends Contract = Contract>(
 ): T | null {
     const { provider: SDKProvider, account } = useSDK();
     const provider = useProvider(SDKProvider);
+    const signer = useSigner(provider, account);
     return useMemo(() => {
         if (!address || !ABI || !provider) return null;
         if (!address) return null;
         try {
-            const contract = new Contract(address, ABI, withSignerIfPossible ? provider?.getSigner(account) : provider);
+            const contract = new Contract(address, ABI, withSignerIfPossible ? (signer ?? provider) : provider);
             return contract as T;
         } catch (error) {
             console.error("Failed to get contract", error);
             return null;
         }
-    }, [ABI, account, address, provider, withSignerIfPossible]);
+    }, [ABI, address, provider, signer, withSignerIfPossible]);
 }

@@ -1,6 +1,3 @@
-"use client";
-import { useState } from "react";
-
 interface Props {
     address: string;
     hasByteCode: boolean;
@@ -22,7 +19,7 @@ export default function ContractDetails({
         <div className="rounded-lg w-full mt-6">
             <form>
                 <div className="mb-4 w-full flex gap-4 items-center border rounded-md border-gray-500">
-                    <label className="font-medium text-gray-700 mb-1 text-nowrap px-6">At address</label>
+                    <label className="font-medium text-gray-700 text-nowrap px-6">At address</label>
                     <input
                         type="text"
                         value={address}
