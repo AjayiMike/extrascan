@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import dynamic from "next/dynamic";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import clsx from "clsx";
 
 const DynamicProviders = dynamic(() => import("@/components/providers"), {
     ssr: false,
@@ -25,10 +26,10 @@ export default function RootLayout({
 }>) {
     return (
         <html lang="en">
-            <body className={inter.className}>
+            <body className={clsx(inter.className, "w-full")}>
                 <DynamicProviders>
                     <Header />
-                    <main className="min-h-[calc(100vh-8rem)]">{children}</main>
+                    <main className="w-full min-h-[calc(100vh-8rem)]">{children}</main>
                     <Footer />
                     <ToastContainer
                         position="bottom-right"

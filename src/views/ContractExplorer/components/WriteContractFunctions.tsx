@@ -12,22 +12,24 @@ import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { useState } from "react";
 
 type Props = {
-    address: string;
-    abi: ReadonlyArray<JsonFragment>;
+    address: string | null;
+    ABI?: string;
 };
-const WriteContractFunctions: React.FC<Props> = ({ address, abi }) => {
-    const writeOnlyFunctionFragments: Props["abi"] = abi.filter(
-        (fragment) =>
+const WriteContractFunctions: React.FC<Props> = ({ address, ABI }) => {
+    const parsedABI = JSON.parse(ABI ?? "[]");
+    const writeOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(
+        (fragment: JsonFragment) =>
             (fragment.stateMutability === FragmentStateMutability.PAYABLE ||
                 fragment.stateMutability === FragmentStateMutability.NON_PAYABLE) &&
             fragment.type === FragmentType.FUNCTION
     );
 
-    const contractInstance = useContract(address, abi);
+    const contractInstance = useContract(address as string, parsedABI);
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
 
     return (
         <div className="w-full mt-6">
+            <h2 className="text-xl font-semibold">Contract Write Functions</h2>
             <div className="w-full mt-4">
                 {writeOnlyFunctionFragments.map((func) => {
                     return (
@@ -61,7 +63,7 @@ const WriteMethod: React.FC<{
 
     const execute = async () => {
         try {
-            if (!contractInstance) return console.log("Contract instance not found");
+            if (!contractInstance) return console.error("Contract instance not found");
             if (args.some((item) => item === undefined)) {
                 console.error("Missing args");
                 return;
@@ -85,7 +87,7 @@ const WriteMethod: React.FC<{
 
     return (
         <Disclosure as="div" className="w-full mt-4 rounded-md border-2 border-gray-200">
-            <DisclosureButton className="w-full flex items-center justify-between bg-gray-200 p-2">
+            <DisclosureButton as="div" className="w-full flex items-center justify-between bg-gray-200 p-2">
                 <span>{name}</span>
                 <ArrowRightIcon width={16} />
             </DisclosureButton>
@@ -114,7 +116,7 @@ const WriteMethod: React.FC<{
                     ))}
 
                     {isPayable && (
-                        <div className="w-full flex gap-4 items-center rounded-md border border-gray-400 focus-within:border-gray-600">
+                        <div className="mt-4 w-full flex gap-4 items-center rounded-md border border-gray-400 focus-within:border-gray-600">
                             <span className="text-sm whitespace-nowrap font-medium text-gray-700 text-nowrap px-4">
                                 Send Native Token
                             </span>

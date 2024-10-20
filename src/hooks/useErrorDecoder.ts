@@ -12,8 +12,6 @@ const useErrorDecoder = (interfaceOrAbi: Interface | JsonFragment[] | undefined)
         return abi.filter((fragment) => fragment.type === FragmentType.ERROR);
     }, [interfaceOrAbi]);
 
-    console.log("errorFragments: ", errorFragments);
-
     return useMemo(() => {
         return ErrorDecoder.create([errorFragments]);
     }, [errorFragments]);

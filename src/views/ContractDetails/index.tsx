@@ -1,64 +1,42 @@
+import NetworkSelector from "@/components/networkSelector";
+import { ArrowPathIcon } from "@heroicons/react/24/solid";
+
 interface Props {
-    address: string;
-    hasByteCode: boolean;
-    byteCode: string;
-    handleHasByteCodeChange: (value: boolean) => void;
-    handleByteCodeChange: (value: string) => void;
+    address: string | undefined;
+    networkId: string | undefined;
     handleAddressChange: (value: string) => void;
+    handleNetWorkIdChange: (value: string) => void;
+    shouldShowRetryButton?: boolean;
+    handleRetry?: () => Promise<void>;
 }
 
 export default function ContractDetails({
     address,
-    hasByteCode,
-    byteCode,
-    handleHasByteCodeChange,
-    handleByteCodeChange,
+    networkId,
     handleAddressChange,
+    handleNetWorkIdChange,
+    shouldShowRetryButton,
+    handleRetry,
 }: Props) {
     return (
-        <div className="rounded-lg w-full mt-6">
-            <form>
-                <div className="mb-4 w-full flex gap-4 items-center border rounded-md border-gray-500">
-                    <label className="font-medium text-gray-700 text-nowrap px-6">At address</label>
-                    <input
-                        type="text"
-                        value={address}
-                        onChange={(e) => handleAddressChange(e.target.value)}
-                        className="w-full px-3 py-2 rounded-r-md bg-gray-200 outline-none"
-                    />
-                </div>
-                <div className="mb-4">
-                    <div className="flex items-center mb-2">
-                        <input
-                            type="checkbox"
-                            id="hasByteCode"
-                            checked={hasByteCode}
-                            onChange={() => handleHasByteCodeChange(!hasByteCode)}
-                            className="mr-2"
-                        />
-                        <label htmlFor="hasByteCode" className="text-sm text-gray-700">
-                            Do you have the contract's bytecode?
-                        </label>
-                    </div>
-                </div>
-                {hasByteCode && (
-                    <div className="mb-4 w-full">
-                        <label className="block font-medium text-gray-700 mb-2">Bytecode</label>
-                        <textarea
-                            placeholder="0x..."
-                            value={byteCode}
-                            onChange={(e) => handleByteCodeChange(e.target.value)}
-                            className="w-full h-56 p-4 rounded-md bg-gray-200 outline-none "
-                        />
-                    </div>
-                )}
+        <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4 mb-6 w-full">
+            <NetworkSelector networkId={networkId} handleNetWorkIdChange={handleNetWorkIdChange} />
+            <input
+                type="text"
+                placeholder="Contract Address"
+                value={address}
+                onChange={(e) => handleAddressChange(e.target.value)}
+                className="h-10 block text-sm w-96 max-w-full px-4 py-2 rounded-md bg-gray-200 outline-none border border-gray-400/50 focus:border-gray-400"
+            />
+            {shouldShowRetryButton && (
                 <button
-                    type="submit"
-                    className="w-full bg-gray-700 text-white py-2 px-4 rounded-md hover:bg-gray-800 transition duration-300"
+                    onClick={handleRetry}
+                    className="h-10 w-96 max-w-full sm:w-24 flex items-center justify-center gap-2 px-4 py-1 bg-cyan-800 text-white rounded-md hover:bg-cyan-700 transition duration-300"
                 >
-                    Proceed
+                    <span>Retry</span>
+                    <ArrowPathIcon className="h-5 w-5" />
                 </button>
-            </form>
+            )}
         </div>
     );
 }

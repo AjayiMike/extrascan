@@ -9,51 +9,55 @@ import { Fragment, useState } from "react";
 import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { Contract, JsonFragment } from "ethers";
 import { Result } from "ethers";
-import { Interface } from "ethers";
 import useErrorDecoder from "@/hooks/useErrorDecoder";
 
 type Props = {
-    address: string;
-    abi: ReadonlyArray<JsonFragment>;
+    address: string | null;
+    ABI?: string;
     startBlock?: number;
 };
 
-const ReadContractFunctions: React.FC<Props> = ({ address, abi, startBlock }) => {
+const ReadContractFunctions: React.FC<Props> = ({ address, ABI, startBlock }) => {
     const [blockNumber, setBlockNumber] = useState<number | null>(null);
 
-    const readOnlyFunctionFragments: Props["abi"] = abi.filter(
-        (fragment) =>
+    const parsedABI = JSON.parse(ABI ?? "[]");
+
+    const readOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(
+        (fragment: JsonFragment) =>
             (fragment.stateMutability === FragmentStateMutability.VIEW ||
                 fragment.stateMutability === FragmentStateMutability.PURE) &&
             fragment.type === FragmentType.FUNCTION
     );
-
-    const contractInstance = useContract(address, abi, false);
+    const contractInstance = useContract(address as string, parsedABI, false);
 
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
 
     return (
         <div className="w-full mt-6">
-            <details className="w-48">
-                <summary className="cursor-pointer selection:bg-transparent">From Block</summary>
-                <input
-                    type="number"
-                    className="w-full p-2 rounded-md border bg-gray-200 outline-none text-sm"
-                    placeholder="latest"
-                    min={startBlock || 0}
-                    pattern="^[0-9]*[.,]?[0-9]*$"
-                    onKeyDown={(evt) => ["e", "E", "+", "-", "."].includes(evt.key) && evt.preventDefault()}
-                    value={blockNumber || ""}
-                    onChange={(event) => {
-                        const nextUserInput = event.target.value.replace(/,/g, ".");
-                        if (nextUserInput === "" || numberInputRegex.test(escapeRegExp(nextUserInput))) {
-                            setBlockNumber(!Number.isNaN(parseInt(nextUserInput)) ? parseInt(nextUserInput) : null);
-                        }
-                    }}
-                />
-            </details>
+            <div className="flex gap-4">
+                <h2 className="text-xl font-semibold">Contract Read Functions</h2>
+                <details className="w-48">
+                    <summary className="cursor-pointer selection:bg-transparent">From Block</summary>
+                    <input
+                        type="number"
+                        className="w-full p-2 rounded-md border bg-gray-200 outline-none text-sm"
+                        placeholder="latest"
+                        min={startBlock || 0}
+                        pattern="^[0-9]*[.,]?[0-9]*$"
+                        onKeyDown={(evt) => ["e", "E", "+", "-", "."].includes(evt.key) && evt.preventDefault()}
+                        value={blockNumber || ""}
+                        onChange={(event) => {
+                            const nextUserInput = event.target.value.replace(/,/g, ".");
+                            if (nextUserInput === "" || numberInputRegex.test(escapeRegExp(nextUserInput))) {
+                                setBlockNumber(!Number.isNaN(parseInt(nextUserInput)) ? parseInt(nextUserInput) : null);
+                            }
+                        }}
+                    />
+                </details>
+            </div>
+
             <div className="w-full mt-4">
-                {readOnlyFunctionFragments.map((func) => {
+                {readOnlyFunctionFragments.map((func: JsonFragment) => {
                     return (
                         <ReadMethod
                             key={func.name}
@@ -85,7 +89,7 @@ const ReadMethod: React.FC<{
     const [loading, setLoading] = useState(false);
 
     const execute = async () => {
-        if (!contractInstance) return console.log("Contract instance not found");
+        if (!contractInstance) return console.error("Contract instance not found");
         try {
             if (args.some((item) => item === undefined)) {
                 console.log("Missing args");
@@ -98,6 +102,7 @@ const ReadMethod: React.FC<{
             const res = await contractInstance[name!](...args, {
                 blockTag: blockNumber ?? "latest",
             });
+
             setResponse({ result: res, error: null });
         } catch (error: any) {
             console.error("error: ", JSON.stringify(error, null, 2));
@@ -110,6 +115,7 @@ const ReadMethod: React.FC<{
     return (
         <Disclosure as="div" className="w-full mt-4 rounded-md border-2 border-gray-200">
             <DisclosureButton
+                as="div"
                 className="w-full flex items-center justify-between bg-gray-200 p-2"
                 onClick={() => {
                     if (args.length === 0) {
@@ -139,7 +145,7 @@ const ReadMethod: React.FC<{
                 )}
             </DisclosureButton>
             <DisclosurePanel className="">
-                <div className="p-2">
+                <div className="p-2 overflow-auto">
                     {inputs.map((input, i) => (
                         <div key={`${input.name}-${i}`} className="space-y-2">
                             <div>
@@ -173,9 +179,9 @@ const ReadMethod: React.FC<{
                     )}
 
                     {loading ? (
-                        <p className="p-2">loading...</p>
-                    ) : response?.result ? (
-                        <p className="p-2">{String(response.result)}</p>
+                        <p className="p-2">fetching...</p>
+                    ) : response && response.result !== null ? (
+                        <p className="p-2">{String(response?.result)}</p>
                     ) : response?.error ? (
                         <p className="p-2 text-red-600">{response.error}</p>
                     ) : null}
