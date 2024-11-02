@@ -3,6 +3,8 @@ import { getContractCreationInfo } from "@/utils/contractCreationBlock";
 import { fetchFunctionTextSignaturesFromPublicDatabases } from "@/utils/functionSignature";
 import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import { whatsabi } from "@shazow/whatsabi";
+import { NextResponse } from "next/server";
+import { getCachedData, setCachedData } from "@/utils/redisCache";
 
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
@@ -10,6 +12,12 @@ export async function POST(request: Request) {
     const { apiKey, networkId, address } = await request.json();
 
     if (!apiKey) return new Response("API Key is required", { status: 400 });
+
+    const cacheKey = `extrapolated:${address}-${networkId}`;
+    const cachedData = await getCachedData(cacheKey);
+    if (cachedData) {
+        return NextResponse.json(cachedData, { status: 200 });
+    }
 
     const safetySettings = [
         {
@@ -64,7 +72,13 @@ export async function POST(request: Request) {
         const response = await result.response;
         const ABI = response.text();
         const { blockNumber, deployer } = await getContractCreationInfo(networkId, address);
-        return new Response(JSON.stringify({ bytecode, ABI, startBlock: blockNumber, deployer }), { status: 200 });
+        // Prepare data to cache
+        const responseData = { bytecode, ABI, startBlock: blockNumber, deployer, address };
+
+        // Store the result in Redis with an expiration time (e.g., 1 hour)
+        await setCachedData(cacheKey, responseData, 3600);
+
+        return NextResponse.json(responseData, { status: 200 });
     } catch (error) {
         console.error("an error occured: ", error);
         return new Response(JSON.stringify({ error }), { status: 500 });
