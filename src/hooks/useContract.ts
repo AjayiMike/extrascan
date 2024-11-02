@@ -13,7 +13,6 @@ export function useContract<T extends Contract = Contract>(
     const signer = useSigner(provider, account);
     return useMemo(() => {
         if (!address || !ABI || !provider) return null;
-        if (!address) return null;
         try {
             const contract = new Contract(address, ABI, withSignerIfPossible ? (signer ?? provider) : provider);
             return contract as T;
