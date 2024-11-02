@@ -62,12 +62,18 @@ const Code: React.FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) =>
                                 <Fragment>
                                     <SparklesIcon
                                         data-tooltip-id="abi-tooltip"
-                                        data-tooltip-content="The ABI was extrapolated with the help of whatsabi, openchain.xyz and AI. The Contract is not verified and ABI may contain errors."
+                                        data-tooltip-content="This ABI was extrapolated with the help of whatsabi, openchain.xyz and AI. The Contract is not verified and ABI may contain errors."
                                         data-tooltip-place="bottom"
-                                        className="h-5 w-5 text-yellow-800"
+                                        className="h-5 w-5 text-yellow-800 cursor-pointer"
                                         aria-hidden="true"
                                     />
-                                    <Tooltip id="abi-tooltip" className="w-10" />
+                                    <Tooltip
+                                        id="abi-tooltip"
+                                        style={{
+                                            width: "12rem",
+                                            fontSize: "0.75rem",
+                                        }}
+                                    />
                                 </Fragment>
                             )}
                         </div>
