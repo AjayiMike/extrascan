@@ -2,7 +2,7 @@ import { CodeDataType } from "@/types/core";
 import { Result } from "@/types/result";
 
 export const loadCodeFromEtherscan = async (
-    networkId: number | string,
+    networkId: number,
     address: string,
     retries = 2
 ): Promise<Result<CodeDataType>> => {
@@ -36,6 +36,7 @@ export const loadCodeFromEtherscan = async (
             return {
                 data: {
                     address,
+                    networkId,
                     isVerified,
                     contractName: contractCodeData.ContractName || null,
                     sourceCode: contractCodeData.SourceCode || null,

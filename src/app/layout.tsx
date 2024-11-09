@@ -6,6 +6,7 @@ import Footer from "@/components/footer";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import clsx from "clsx";
+import { Suspense } from "react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -23,7 +24,9 @@ export default function RootLayout({
         <html lang="en">
             <body className={clsx(inter.className, "w-full")}>
                 <Header />
-                <main className="w-full min-h-[calc(100vh-8rem)]">{children}</main>
+                <Suspense>
+                    <main className="w-full min-h-[calc(100vh-8rem)]">{children}</main>
+                </Suspense>
                 <Footer />
                 <ToastContainer
                     position="bottom-right"

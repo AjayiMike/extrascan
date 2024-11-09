@@ -77,7 +77,7 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
                                     "focus:outline-none data-[focus]:outline-2 data-[focus]:-outline-offset-2 data-[focus]:outline-white/25",
                                     "*:text-black"
                                 )}
-                                onChange={(e) =>
+                                onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                                     handleSelectChange(
                                         ABIFormatOptions.find((option) => option.value === e.target.value)
                                     )
