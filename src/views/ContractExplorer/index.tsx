@@ -1,11 +1,10 @@
 "use client";
 import { shortenAddress } from "@/utils/address";
-import { JsonFragment } from "ethers";
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import ReadContractFunctions from "./components/ReadContractFunctions";
 import WriteContractFunctions from "./components/WriteContractFunctions";
-import Code from "./components/Code";
+import ABIComponent from "./components/ABI";
 import { CodeDataType } from "@/types/core";
 import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
 
@@ -13,7 +12,18 @@ type Props = {
     data: CodeDataType;
 };
 const ContractExplorer: React.FC<Props> = ({
-    data: { ABI, address, contractName, bytecode, sourceCode, isVerified, startBlock, deployer },
+    data: {
+        ABI,
+        ABIConfidenceScores,
+        address,
+        networkId,
+        contractName,
+        bytecode,
+        sourceCode,
+        isVerified,
+        startBlock,
+        deployer,
+    },
 }) => {
     return (
         <div className="w-full">
@@ -26,15 +36,15 @@ const ContractExplorer: React.FC<Props> = ({
                     <span>Verified:</span>
                     <span className="text-cyan-800 flex items-center gap-1">
                         {isVerified ? (
-                            <>
+                            <span className="flex gap-1 items-center">
                                 <CheckCircleIcon className="h-5 w-5 text-green-500" />
-                                Yes
-                            </>
+                                <span>Yes</span>
+                            </span>
                         ) : (
-                            <>
+                            <span className="flex gap-1 items-center">
                                 <XCircleIcon className="h-5 w-5 text-red-500" />
-                                No
-                            </>
+                                <span>No</span>
+                            </span>
                         )}
                     </span>
                 </div>
@@ -47,7 +57,14 @@ const ContractExplorer: React.FC<Props> = ({
                     <span className="text-cyan-800">{startBlock ?? "Unknown"}</span>
                 </div>
             </div>
-            <TabGroup className="w-full mt-6">
+            {!isVerified && (
+                <p className="mt-4 text-sm text-gray-500">
+                    The ABI of this smart contract was extrapolated from the bytecode, as such, some functions may not
+                    be present or accurately represented. Associated with each function is a confidence score (from 0 -
+                    1), which indicates the likelihood of the function being accurate.
+                </p>
+            )}
+            <TabGroup className="w-full mt-4">
                 <TabList className="flex gap-4 border-b-2 border-gray-300">
                     <Tab className="pr-4 font-semibold text-gray-700 focus:outline-none data-[selected]:border-b-2 data-[selected]:border-gray-700 data-[focus]:outline-1 data-[focus]:outline-gray-700">
                         Read
@@ -56,18 +73,34 @@ const ContractExplorer: React.FC<Props> = ({
                         Write
                     </Tab>
                     <Tab className="pr-4 font-semibold text-gray-700 focus:outline-none data-[selected]:border-b-2 data-[selected]:border-gray-700 data-[focus]:outline-1 data-[focus]:outline-gray-700">
-                        Code
+                        ABI
                     </Tab>
                 </TabList>
                 <TabPanels>
                     <TabPanel>
-                        <ReadContractFunctions address={address} ABI={ABI} />
+                        <ReadContractFunctions
+                            networkId={networkId}
+                            address={address}
+                            ABI={ABI}
+                            ABIConfidenceScores={ABIConfidenceScores}
+                            startBlock={startBlock}
+                        />
                     </TabPanel>
                     <TabPanel>
-                        <WriteContractFunctions address={address} ABI={ABI} />
+                        <WriteContractFunctions
+                            networkId={networkId}
+                            address={address}
+                            ABI={ABI}
+                            ABIConfidenceScores={ABIConfidenceScores}
+                        />
                     </TabPanel>
                     <TabPanel>
-                        <Code ABI={ABI} bytecode={bytecode} sourceCode={sourceCode} isExtrapolated={!isVerified} />
+                        <ABIComponent
+                            ABI={ABI}
+                            bytecode={bytecode}
+                            sourceCode={sourceCode}
+                            isExtrapolated={!isVerified}
+                        />
                     </TabPanel>
                 </TabPanels>
             </TabGroup>

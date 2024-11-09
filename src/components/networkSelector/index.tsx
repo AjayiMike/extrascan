@@ -1,23 +1,47 @@
-import { getNetworkIcon, getNetworkName, supportedNetworks } from "@/config/network";
+import { getNetworkIcon, getNetworkName } from "@/config/network";
+import useSupportedNetworkData from "@/hooks/useSupportedNetworkData";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { ChevronDownIcon } from "@heroicons/react/24/solid";
-import React, { Fragment } from "react";
+import Image from "next/image";
+import React, { Fragment, useEffect } from "react";
 
 type Props = {
-    networkId: string | undefined;
-    handleNetWorkIdChange: (value: string) => void;
+    networkId: number | undefined;
+    handleNetworkIdChange: (value: string) => void;
 };
 
-const NetworkSelector: React.FC<Props> = ({ networkId, handleNetWorkIdChange }) => {
+const NetworkSelector: React.FC<Props> = ({ networkId, handleNetworkIdChange }) => {
     const [networkModalIsOpen, setNetworkModalIsOpen] = React.useState(false);
     const [searchTerm, setSearchTerm] = React.useState("");
+    const networkData = useSupportedNetworkData();
+
+    const [networkIcon, setNetworkIcon] = React.useState<string | null>(null);
+    const [networkName, setNetworkName] = React.useState<string | null>(null);
+    useEffect(() => {
+        if (networkId) {
+            Promise.all([getNetworkIcon(networkId), getNetworkName(networkId)])
+                .then(([icon, name]) => {
+                    setNetworkIcon(icon);
+                    setNetworkName(name);
+                })
+                .catch(() => {
+                    setNetworkIcon(null);
+                    setNetworkName(null);
+                });
+        } else {
+            setNetworkIcon(null);
+            setNetworkName(null);
+        }
+    }, [networkId]);
+
     const filteredNetworks = React.useMemo(() => {
-        if (!searchTerm) return supportedNetworks;
-        return supportedNetworks.filter(
+        if (!searchTerm) return networkData;
+        return networkData.filter(
             (network) =>
-                network.name.toLowerCase().includes(searchTerm.toLowerCase()) || network.id === Number(searchTerm)
+                network.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                network.chainId.toString().includes(searchTerm)
         );
-    }, [searchTerm]);
+    }, [networkData, searchTerm]);
 
     const handleNetworkButtonClick = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
         setNetworkModalIsOpen(true);
@@ -31,11 +55,21 @@ const NetworkSelector: React.FC<Props> = ({ networkId, handleNetWorkIdChange }) 
                 className="h-10 w-full flex justify-between items-center cursor-pointer bg-white hover:bg-gray-300 px-4 py-2 rounded-md hover:bg-white/25 transition duration-300"
             >
                 <div className="flex items-center gap-2">
-                    {networkId && <img src={getNetworkIcon(networkId)} alt="network icon" className="h-6 w-6" />}
+                    {networkIcon ? (
+                        <Image src={networkIcon ?? ""} alt="network icon" width={0} height={0} sizes="24px" />
+                    ) : (
+                        <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+                            <path
+                                fillRule="evenodd"
+                                d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4.44-2.7a.94.94 0 00-1.11-.28l-3.26-3.36a.94.94 0 00-1.08.05L8.47 11.3a.94.94 0 00.28 1.08l3.26 3.36a.94.94 0 00.99-.17.94.94 0 00.09-1.11z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    )}
                     <input
                         readOnly
                         className="text-left outline-none bg-transparent"
-                        value={networkId ? getNetworkName(networkId) : "Select Network"}
+                        value={networkName ?? "Select Network"}
                     />
                 </div>
                 <ChevronDownIcon className="group pointer-events-none size-4 fill-black/60" aria-hidden="true" />
@@ -86,14 +120,38 @@ const NetworkSelector: React.FC<Props> = ({ networkId, handleNetWorkIdChange }) 
                                         <div className="mt-2 max-h-60 overflow-y-auto">
                                             {filteredNetworks.map((network) => (
                                                 <div
-                                                    key={network.id}
+                                                    key={network.chainId}
                                                     className="cursor-pointer px-3 py-2 hover:bg-gray-100"
                                                     onClick={() => {
-                                                        handleNetWorkIdChange(String(network.id));
+                                                        handleNetworkIdChange(String(network.chainId));
                                                         setNetworkModalIsOpen(false);
                                                     }}
                                                 >
-                                                    {network.name}
+                                                    <div className="flex items-center gap-2">
+                                                        {network.iconUrl ? (
+                                                            <Image
+                                                                src={network.iconUrl}
+                                                                alt="network icon"
+                                                                width={24}
+                                                                height={24}
+                                                                style={{ height: "24px" }}
+                                                            />
+                                                        ) : (
+                                                            <svg
+                                                                viewBox="0 0 24 24"
+                                                                fill="currentColor"
+                                                                width="24"
+                                                                height="24"
+                                                            >
+                                                                <path
+                                                                    fillRule="evenodd"
+                                                                    d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm4.44-2.7a.94.94 0 00-1.11-.28l-3.26-3.36a.94.94 0 00-1.08.05L8.47 11.3a.94.94 0 00.28 1.08l3.26 3.36a.94.94 0 00.99-.17.94.94 0 00.09-1.11z"
+                                                                    clipRule="evenodd"
+                                                                />
+                                                            </svg>
+                                                        )}
+                                                        <span>{network.name}</span>
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>

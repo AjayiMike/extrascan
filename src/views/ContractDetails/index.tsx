@@ -3,9 +3,9 @@ import { ArrowPathIcon } from "@heroicons/react/24/solid";
 
 interface Props {
     address: string | undefined;
-    networkId: string | undefined;
+    networkId: number | undefined;
     handleAddressChange: (value: string) => void;
-    handleNetWorkIdChange: (value: string) => void;
+    handleNetworkIdChange: (value: string) => void;
     shouldShowRetryButton?: boolean;
     handleRetry?: () => Promise<void>;
 }
@@ -14,18 +14,18 @@ export default function ContractDetails({
     address,
     networkId,
     handleAddressChange,
-    handleNetWorkIdChange,
+    handleNetworkIdChange,
     shouldShowRetryButton,
     handleRetry,
 }: Props) {
     return (
         <div className="flex flex-col items-center sm:flex-row sm:items-center gap-4 mb-6 w-full">
-            <NetworkSelector networkId={networkId} handleNetWorkIdChange={handleNetWorkIdChange} />
+            <NetworkSelector networkId={networkId} handleNetworkIdChange={handleNetworkIdChange} />
             <input
                 type="text"
                 placeholder="Contract Address"
                 value={address}
-                onChange={(e) => handleAddressChange(e.target.value)}
+                onChange={(e) => handleAddressChange(e.target.value.trim().toLowerCase())}
                 className="h-10 block text-sm w-96 max-w-full px-4 py-2 rounded-md bg-gray-200 outline-none border border-gray-400/50 focus:border-gray-400"
             />
             {shouldShowRetryButton && (

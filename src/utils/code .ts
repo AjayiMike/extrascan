@@ -1,25 +1,31 @@
-import { getEtherscanLikeAPIUrl, getNetworkName } from "@/config/network";
 import { CodeDataType } from "@/types/core";
 import { Result } from "@/types/result";
 
 export const loadCodeFromEtherscan = async (
     networkId: number | string,
-    address: string
+    address: string,
+    retries = 2
 ): Promise<Result<CodeDataType>> => {
     try {
-        const scanApiUrl = getEtherscanLikeAPIUrl(getNetworkName(networkId));
-        const response = await fetch(`${scanApiUrl}?module=contract&action=getsourcecode&address=${address}`);
+        const response = await fetch(
+            `${process.env.NEXT_PUBLIC_ETHERSCAN_API_URL}/api?chainid=${networkId}&module=contract&action=getsourcecode&address=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`
+        );
         const data = await response.json();
 
         // Etherscan returns a JSON object that has a `status`, a `message` and
         // a `result` field. The `status` is '0' in case of errors and '1' in
         // case of success
         if (data.status === "0") {
-            return {
-                error: {
-                    message: `${data.message} ${data.result}`,
-                },
-            };
+            if (retries > 0) {
+                // Retry the request
+                return loadCodeFromEtherscan(networkId, address, retries - 1);
+            } else {
+                return {
+                    error: {
+                        message: `${data.message} ${data.result}`,
+                    },
+                };
+            }
         }
 
         const contractCodeData = data.result[0];
@@ -43,10 +49,15 @@ export const loadCodeFromEtherscan = async (
         // it is the proxy, go to implementation
         return loadCodeFromEtherscan(networkId, contractCodeData.Implementation);
     } catch (error) {
-        return {
-            error: {
-                message: "error getting smart contract data information",
-            },
-        };
+        if (retries > 0) {
+            // Retry the request
+            return loadCodeFromEtherscan(networkId, address, retries - 1);
+        } else {
+            return {
+                error: {
+                    message: "error getting smart contract data information",
+                },
+            };
+        }
     }
 };

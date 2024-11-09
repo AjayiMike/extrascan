@@ -3,19 +3,24 @@
 import { FragmentStateMutability, FragmentType } from "@/constant/fragment";
 import { useContract } from "@/hooks/useContract";
 import useErrorDecoder from "@/hooks/useErrorDecoder";
+import { useNetworkDataForChainId } from "@/hooks/useSupportedNetworkData";
+import { getFragmentConfidenceScore } from "@/utils/confidenceScore";
 import { escapeRegExp, numberInputRegex } from "@/utils/regex";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { Contract } from "ethers";
 import { JsonFragment } from "ethers";
 import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { useState } from "react";
 
 type Props = {
+    networkId: number;
     address: string | null;
     ABI?: string;
+    ABIConfidenceScores?: { [key: string]: number };
 };
-const WriteContractFunctions: React.FC<Props> = ({ address, ABI }) => {
+const WriteContractFunctions: React.FC<Props> = ({ networkId, address, ABI, ABIConfidenceScores }) => {
     const parsedABI = JSON.parse(ABI ?? "[]");
     const writeOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(
         (fragment: JsonFragment) =>
@@ -23,21 +28,36 @@ const WriteContractFunctions: React.FC<Props> = ({ address, ABI }) => {
                 fragment.stateMutability === FragmentStateMutability.NON_PAYABLE) &&
             fragment.type === FragmentType.FUNCTION
     );
+    const networkData = useNetworkDataForChainId(networkId);
+    const { chainId } = useAppKitNetwork();
+    const { address: account } = useAppKitAccount();
 
-    const contractInstance = useContract(address as string, parsedABI);
+    const contractInstance = useContract(address as string, parsedABI, networkId);
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
+
+    const isOnWrongNetwork = chainId !== networkId;
 
     return (
         <div className="w-full mt-6">
-            <h2 className="text-xl font-semibold">Contract Write Functions</h2>
+            <div className="flex flex-col md:flex-row md:gap-4 md:items-center">
+                <h2 className="text-xl font-semibold">Contract Write Functions</h2>
+                <span className="text-orange-700 text-sm">
+                    {!account
+                        ? "Connecte wallet to write"
+                        : isOnWrongNetwork && networkData && `Switch to ${networkData?.name}`}
+                </span>
+            </div>
+
             <div className="w-full mt-4">
-                {writeOnlyFunctionFragments.map((func) => {
+                {writeOnlyFunctionFragments.map((func, index) => {
                     return (
                         <WriteMethod
-                            key={func.name}
+                            key={`${func.name}-${index}`}
                             fragment={func}
                             contractInstance={contractInstance}
                             errorDecoder={errorDecoder}
+                            confidenceScores={getFragmentConfidenceScore(ABIConfidenceScores, func)}
+                            disable={isOnWrongNetwork}
                         />
                     );
                 })}
@@ -48,9 +68,11 @@ const WriteContractFunctions: React.FC<Props> = ({ address, ABI }) => {
 
 const WriteMethod: React.FC<{
     fragment: JsonFragment;
+    confidenceScores?: number;
     contractInstance: Contract | null;
     errorDecoder: ErrorDecoder;
-}> = ({ fragment, contractInstance, errorDecoder }) => {
+    disable: boolean;
+}> = ({ fragment, contractInstance, errorDecoder, confidenceScores, disable }) => {
     const name = fragment.name;
     const inputs = fragment.inputs || [];
     const [args, setArgs] = useState<(string | undefined)[]>(Array(inputs.length).fill(undefined));
@@ -62,10 +84,11 @@ const WriteMethod: React.FC<{
     const isPayable = fragment.stateMutability === FragmentStateMutability.PAYABLE;
 
     const execute = async () => {
+        if (disable) return;
         try {
-            if (!contractInstance) return console.error("Contract instance not found");
+            if (!contractInstance) return console.debug("Contract instance not found");
             if (args.some((item) => item === undefined)) {
-                console.error("Missing args");
+                console.debug("Missing args");
                 return;
             }
             setError(null);
@@ -77,7 +100,7 @@ const WriteMethod: React.FC<{
             setTxHash(tx.hash);
             await tx.wait();
         } catch (error: any) {
-            console.error("error: ", JSON.stringify(error, null, 2));
+            console.debug("error: ", JSON.stringify(error, null, 2));
             const decodedError: DecodedError = await errorDecoder.decode(error);
             setError(decodedError.reason || "Unknow error");
         } finally {
@@ -88,7 +111,14 @@ const WriteMethod: React.FC<{
     return (
         <Disclosure as="div" className="w-full mt-4 rounded-md border-2 border-gray-200">
             <DisclosureButton as="div" className="w-full flex items-center justify-between bg-gray-200 p-2">
-                <span>{name}</span>
+                <span>
+                    <span>{name}</span>
+                    {confidenceScores && (
+                        <span className="text-[10px] text-gray-200 ml-2 bg-cyan-800/50 rounded-full px-[6px] py-[2px]">
+                            {confidenceScores}
+                        </span>
+                    )}
+                </span>
                 <ArrowRightIcon width={16} />
             </DisclosureButton>
             <DisclosurePanel className="">
@@ -141,10 +171,11 @@ const WriteMethod: React.FC<{
                     )}
                     <div>
                         <button
-                            className="mt-2 py-1 px-3 text-sm rounded-md bg-gray-500 hover:bg-gray-700 text-gray-50"
+                            className="mt-2 py-1 px-3 text-sm rounded-md bg-gray-500 hover:bg-gray-700 text-gray-50 disabled:bg-gray-200 disabled:text-gray-500 disabled:cursor-not-allowed"
                             onClick={() => {
                                 execute();
                             }}
+                            disabled={disable}
                         >
                             Write
                         </button>

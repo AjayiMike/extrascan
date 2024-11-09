@@ -10,14 +10,17 @@ import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { Contract, JsonFragment } from "ethers";
 import { Result } from "ethers";
 import useErrorDecoder from "@/hooks/useErrorDecoder";
+import { getFragmentConfidenceScore } from "@/utils/confidenceScore";
 
 type Props = {
+    networkId: number;
     address: string | null;
     ABI?: string;
+    ABIConfidenceScores?: { [key: string]: number };
     startBlock?: number;
 };
 
-const ReadContractFunctions: React.FC<Props> = ({ address, ABI, startBlock }) => {
+const ReadContractFunctions: React.FC<Props> = ({ address, ABI, networkId, ABIConfidenceScores, startBlock }) => {
     const [blockNumber, setBlockNumber] = useState<number | null>(null);
 
     const parsedABI = JSON.parse(ABI ?? "[]");
@@ -28,7 +31,8 @@ const ReadContractFunctions: React.FC<Props> = ({ address, ABI, startBlock }) =>
                 fragment.stateMutability === FragmentStateMutability.PURE) &&
             fragment.type === FragmentType.FUNCTION
     );
-    const contractInstance = useContract(address as string, parsedABI, false);
+
+    const contractInstance = useContract(address as string, parsedABI, networkId, false);
 
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
 
@@ -57,14 +61,15 @@ const ReadContractFunctions: React.FC<Props> = ({ address, ABI, startBlock }) =>
             </div>
 
             <div className="w-full mt-4">
-                {readOnlyFunctionFragments.map((func: JsonFragment) => {
+                {readOnlyFunctionFragments.map((func: JsonFragment, index: number) => {
                     return (
                         <ReadMethod
-                            key={func.name}
+                            key={`${func.name}-${index}`}
                             fragment={func}
                             contractInstance={contractInstance}
                             blockNumber={blockNumber}
                             errorDecoder={errorDecoder}
+                            confidenceScores={getFragmentConfidenceScore(ABIConfidenceScores, func)}
                         />
                     );
                 })}
@@ -76,9 +81,10 @@ const ReadContractFunctions: React.FC<Props> = ({ address, ABI, startBlock }) =>
 const ReadMethod: React.FC<{
     fragment: JsonFragment;
     contractInstance: Contract | null;
+    confidenceScores?: number;
     blockNumber: number | null;
     errorDecoder: ErrorDecoder;
-}> = ({ fragment, contractInstance, blockNumber, errorDecoder }) => {
+}> = ({ fragment, contractInstance, confidenceScores, blockNumber, errorDecoder }) => {
     const name = fragment.name;
     const inputs = fragment.inputs || [];
     const [args, setArgs] = useState<(string | undefined)[]>(Array(inputs.length).fill(undefined));
@@ -89,10 +95,10 @@ const ReadMethod: React.FC<{
     const [loading, setLoading] = useState(false);
 
     const execute = async () => {
-        if (!contractInstance) return console.error("Contract instance not found");
+        if (!contractInstance) return console.debug("Contract instance not found");
         try {
             if (args.some((item) => item === undefined)) {
-                console.log("Missing args");
+                console.debug("Missing args");
                 return;
             }
 
@@ -105,7 +111,7 @@ const ReadMethod: React.FC<{
 
             setResponse({ result: res, error: null });
         } catch (error: any) {
-            console.error("error: ", JSON.stringify(error, null, 2));
+            console.debug("error: ", JSON.stringify(error, null, 2));
             const decodedError: DecodedError = await errorDecoder.decode(error);
             setResponse({ result: null, error: decodedError.reason || "Unknow error" });
         } finally {
@@ -125,7 +131,14 @@ const ReadMethod: React.FC<{
             >
                 {({ open }) => (
                     <Fragment>
-                        <span>{name}</span>
+                        <span>
+                            <span>{name}</span>
+                            {confidenceScores && (
+                                <span className="text-[10px] text-gray-200 ml-2 bg-cyan-800/50 rounded-full px-[6px] py-[2px]">
+                                    {confidenceScores}
+                                </span>
+                            )}
+                        </span>
                         {args.length === 0 ? (
                             <button
                                 className="mt-2 py-1 px-3 text-sm rounded-md bg-gray-500 hover:bg-gray-700 text-gray-50"

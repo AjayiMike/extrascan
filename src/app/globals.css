@@ -20,7 +20,7 @@ body {
 
 /* HTML: <div class="loader"></div> */
 .loader-cube {
-    --s: 25px;
+    --s: 14px;
 
     --_d: calc(0.353 * var(--s));
     width: calc(var(--s) + var(--_d));
@@ -39,7 +39,7 @@ body {
 @keyframes l1 {
     50%,
     100% {
-        transform: translateY(0.1px);
+        transform: translateY(0.05px);
     }
 }
 
@@ -48,12 +48,15 @@ body {
     width: fit-content;
     font-weight: bold;
     font-family: monospace;
-    font-size: 30px;
+    font-size: 16px;
     clip-path: inset(0 3ch 0 0);
     animation: l4 1s steps(4) infinite;
 }
 .loader-text:before {
     content: "Loading...";
+}
+.loader-text.extrapolating:before {
+    content: "Extrapolating ABI...";
 }
 @keyframes l4 {
     to {

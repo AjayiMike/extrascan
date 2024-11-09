@@ -1,16 +1,12 @@
-import { SDKState } from "@metamask/sdk-react";
 import { BrowserProvider, JsonRpcSigner } from "ethers";
 import { useEffect, useMemo, useState } from "react";
 
-const useProvider = (provider: SDKState["provider"]): BrowserProvider | null => {
+const useProvider = (provider: any): BrowserProvider | null => {
     if (!provider) return null;
     return new BrowserProvider(provider);
 };
 
-export const useSigner = (
-    provider: BrowserProvider | null,
-    account: SDKState["account"] | null
-): JsonRpcSigner | null => {
+export const useSigner = (provider: BrowserProvider | null, account: string | undefined): JsonRpcSigner | null => {
     const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
 
     useEffect(() => {
@@ -27,7 +23,7 @@ export const useSigner = (
                     setSigner((prev) => (isSignerEqual(prev, newSigner) ? prev : newSigner));
                 }
             } catch (error) {
-                console.error("Error getting signer:", error);
+                console.debug("Error getting signer:", error);
                 if (mounted) {
                     setSigner(null);
                 }

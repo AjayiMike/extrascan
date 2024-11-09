@@ -1,12 +1,14 @@
-import { getEtherscanLikeAPIUrl, getPublicRPCEndpoint, getNetworkName } from "@/config/network";
+import { getRPCURLs } from "@/config/network";
 
 export const getContractCreationInfo = async (
-    networkId: number | string,
-    address: string
+    networkId: number,
+    address: string,
+    retries: number = 2
 ): Promise<{ blockNumber: number; deployer: string }> => {
     try {
-        const transactionHash = await fetchDeployContractTransactionFromEtherscan(networkId, address);
-        const txn = await fetchTransactionByHashFromRPC(networkId, transactionHash);
+        const transactionHash = await fetchDeployContractTransactionFromEtherscan(networkId, address, retries);
+        if (!transactionHash) throw new Error("Failed to fetch contract creation transaction");
+        const txn = await fetchTransactionByHashFromRPC(networkId, transactionHash, retries);
         const blockNumber = parseInt(txn.result.blockNumber, 16);
         const deployer = txn.result.from;
         return { blockNumber, deployer };
@@ -16,20 +18,28 @@ export const getContractCreationInfo = async (
 };
 
 export const fetchDeployContractTransactionFromEtherscan = async (
-    networkId: number | string,
-    address: string
-): Promise<string> => {
-    const scanApiUrl = getEtherscanLikeAPIUrl(getNetworkName(networkId));
-    const json = await fetchContractCreationHashWithRetry(
-        `${scanApiUrl}?module=contract&action=getcontractcreation&contractaddresses=${address}`,
-        5
-    );
-    if (json.status === "1") {
-        const hash = json.result[0].txHash;
-        return hash;
+    networkId: number,
+    address: string,
+    retries: number = 2
+): Promise<string | undefined> => {
+    let json;
+    for (let i = 0; i <= retries; i++) {
+        try {
+            json = await fetchContractCreationHashWithRetry(
+                `${process.env.NEXT_PUBLIC_ETHERSCAN_API_URL}/api?chainid=${networkId}&module=contract&action=getcontractcreation&contractaddresses=${address}&apikey=${process.env.ETHERSCAN_API_KEY}`,
+                5
+            );
+            if (json.status === "1") {
+                const hash = json.result[0].txHash;
+                return hash;
+            }
+        } catch (error) {
+            if (i === retries) {
+                throw new Error(`Failed to fetch deploy contract transaction after ${retries} retries`);
+            }
+        }
     }
-
-    throw new Error(`Failed to fetch deploy contract transaction`);
+    return undefined;
 };
 
 export const fetchContractCreationHashWithRetry = async (url: string, retryCount: number): Promise<any> => {
@@ -42,36 +52,45 @@ export const fetchContractCreationHashWithRetry = async (url: string, retryCount
                 return json;
             }
         } catch (error) {
-            console.error("Failed to fetch contract creation transaction hash: ", error);
+            console.debug("Failed to fetch contract creation transaction hash: ", error);
         }
     }
     throw new Error(`Failed to fetch contract creation transaction hash`);
 };
 
 export const fetchTransactionByHashFromRPC = async (
-    networkId: number | string,
-    transactionHash: string
+    networkId: number,
+    transactionHash: string,
+    retries: number = 2
 ): Promise<any> => {
     let json: any;
-    try {
-        const RPCURL = getPublicRPCEndpoint(getNetworkName(networkId));
-        if (!RPCURL) throw new Error(`Unable to fetch RPC URL for ${getNetworkName(networkId)}`);
-        const result = await fetch(String(RPCURL), {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-                jsonrpc: "2.0",
-                method: "eth_getTransactionByHash",
-                params: [transactionHash],
-                id: 1,
-            }),
-        });
-        json = await result.json();
-        return json;
-    } catch (error) {
-        console.error("Failed to fetchTransactionByHashFromRPC: ", error);
-        throw new Error("Failed to fetch contract creation transaction");
+    for (let i = 0; i <= retries; i++) {
+        try {
+            const RPCURL = (await getRPCURLs(networkId))[0];
+            if (!RPCURL) throw new Error(`Unable to fetch RPC URL for network id ${networkId}`);
+
+            const result = await fetch(RPCURL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    jsonrpc: "2.0",
+                    method: "eth_getTransactionByHash",
+                    params: [transactionHash],
+                    id: 1,
+                }),
+            });
+            json = await result.json();
+
+            if (json.result) {
+                return json;
+            }
+        } catch (error) {
+            if (i === retries) {
+                console.debug("Failed to fetchTransactionByHashFromRPC after max retries: ", error);
+                throw new Error(`Failed to fetch contract creation transaction after ${retries} retries`);
+            }
+        }
     }
 };

@@ -1,10 +1,9 @@
-import { getNetworkName, getPublicRPCEndpoint } from "@/config/network";
+import { getNetworkName, getRPCURLs } from "@/config/network";
 
-export const getBytecode = async (networkId: number | string, address: string): Promise<string> => {
-    const networkName = getNetworkName(networkId);
-    const RPCURL = getPublicRPCEndpoint(networkName);
+export const getBytecode = async (networkId: number, address: string): Promise<string> => {
     try {
-        if (!RPCURL) throw new Error(`Unable to fetch RPC URL for ${networkName}`);
+        const RPCURL = (await getRPCURLs(networkId))[0];
+        if (!RPCURL) throw new Error(`Unable to fetch RPC URL for network id ${networkId}`);
         const result = await fetch(String(RPCURL), {
             method: "POST",
             headers: {
@@ -18,11 +17,12 @@ export const getBytecode = async (networkId: number | string, address: string): 
             }),
         });
         const data = await result.json();
+
         if (data.result === "0x")
             throw new Error("Code not found: probably due to wrong networkId or the address is an EOA");
         return data.result;
     } catch (error) {
-        console.error("Failed to fetch contract bytecode: ", error);
+        console.debug("Failed to fetch contract bytecode: ", error);
         throw new Error("Failed to fetch contract bytecode");
     }
 };
