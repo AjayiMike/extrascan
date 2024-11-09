@@ -102,7 +102,7 @@ export default function Home() {
     return (
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">SmartScan</h1>
+                <h1 className="text-2xl font-bold text-gray-900">Extrascan</h1>
                 <p className="text-gray-500">Interact with smart contracts and get its ABI, verified or not.</p>
             </div>
             <ContractDetails

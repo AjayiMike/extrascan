@@ -17,7 +17,7 @@ const Header = (props: Props) => {
                         <div className="flex-shrink-0 flex items-center">
                             <Link href="/" className="flex items-center">
                                 <Image src={logo} alt="logo" width={32} height={32} />
-                                <span className="ml-2 text-xl font-bold">SmartScan</span>
+                                <span className="ml-2 text-xl font-bold">Extrascan</span>
                             </Link>
                         </div>
                     </div>
