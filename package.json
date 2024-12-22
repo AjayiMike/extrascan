@@ -23,6 +23,7 @@
         "npm": "please-use-yarn"
     },
     "dependencies": {
+        "@anthropic-ai/sdk": "^0.33.1",
         "@coinbase/wallet-sdk": "^4.2.2",
         "@google/generative-ai": "^0.21.0",
         "@headlessui/react": "^2.1.2",
@@ -39,6 +40,7 @@
         "lodash": "^4.17.21",
         "next": "15.0.2",
         "nuqs": "^1.17.8",
+        "openai": "^4.77.0",
         "querystring": "^0.2.1",
         "react": "19.0.0-rc-02c0e824-20241028",
         "react-dom": "19.0.0-rc-02c0e824-20241028",
