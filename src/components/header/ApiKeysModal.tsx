@@ -2,17 +2,12 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@
 import { Icon } from "@iconify/react";
 import { Fragment, useEffect, useState } from "react";
 import { API_KEYS_LOCALSTORAGE_KEY, validateApiKey } from "@/utils/apiKeys";
-
-type ApiKeys = {
-    gemini?: string;
-    openai?: string;
-    anthropic?: string;
-};
+import { ModelProvider, ModelApiKeys, MODEL_DISPLAY_NAMES, SUPPORTED_PROVIDERS } from "@/types/models";
 
 const ApiKeysModal = () => {
     const [isOpen, setIsOpen] = useState(false);
-    const [keys, setKeys] = useState<ApiKeys>({});
-    const [errors, setErrors] = useState<Record<keyof ApiKeys, string>>({} as Record<keyof ApiKeys, string>);
+    const [keys, setKeys] = useState<ModelApiKeys>({});
+    const [errors, setErrors] = useState<Record<ModelProvider, string>>({} as Record<ModelProvider, string>);
 
     useEffect(() => {
         const storedKeys = localStorage.getItem(API_KEYS_LOCALSTORAGE_KEY);
@@ -21,7 +16,7 @@ const ApiKeysModal = () => {
         }
     }, []);
 
-    const handleSave = (provider: keyof ApiKeys, value: string) => {
+    const handleSave = (provider: ModelProvider, value: string) => {
         setErrors((prev) => ({ ...prev, [provider]: "" }));
 
         if (!value) {
@@ -51,13 +46,13 @@ const ApiKeysModal = () => {
         e.preventDefault();
     };
 
-    const handlePaste = (provider: keyof ApiKeys, e: React.ClipboardEvent<HTMLInputElement>) => {
+    const handlePaste = (provider: ModelProvider, e: React.ClipboardEvent<HTMLInputElement>) => {
         e.preventDefault();
         const pastedText = e.clipboardData.getData("text").trim();
         handleSave(provider, pastedText);
     };
 
-    const clearKey = (provider: keyof ApiKeys) => {
+    const clearKey = (provider: ModelProvider) => {
         handleSave(provider, "");
     };
 
@@ -67,7 +62,7 @@ const ApiKeysModal = () => {
                 onClick={() => setIsOpen(true)}
                 className="h-10 px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 border border-gray-300 rounded-md"
             >
-                <Icon icon="carbon:api" className="h-5 w-5" />
+                <Icon icon="carbon:api-key" className="h-5 w-5" />
             </button>
 
             <Transition appear show={isOpen} as={Fragment}>
@@ -103,40 +98,45 @@ const ApiKeysModal = () => {
                                         <p>Paste your API keys below. Direct typing is disabled for security.</p>
                                     </div>
                                     <div className="mt-4 space-y-4">
-                                        {(["gemini", "openai", "anthropic"] as const).map((provider) => (
-                                            <div key={provider}>
-                                                <label className="block text-sm font-medium text-gray-700">
-                                                    {provider.charAt(0).toUpperCase() + provider.slice(1)} API Key
-                                                </label>
-                                                <div className="mt-1 relative">
-                                                    <input
-                                                        type="password"
-                                                        className={`block shadow-sm sm:text-sm pr-8 w-full p-1 outline-none text-sm rounded-md bg-transparent border border-gray-500 focus:border-gray-600 ${
-                                                            errors[provider]
-                                                                ? "border-red-300 focus:border-red-500 focus:ring-red-500"
-                                                                : "border-gray-300 focus:border-cyan-500 focus:ring-cyan-500"
-                                                        }`}
-                                                        value={keys[provider] || ""}
-                                                        // onKeyDown={handleKeyPress}
-                                                        onPaste={(e) => handlePaste(provider, e)}
-                                                        placeholder={`Paste ${provider} API key here`}
-                                                        readOnly
-                                                    />
-                                                    {keys[provider] && (
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => clearKey(provider)}
-                                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                                                        >
-                                                            <Icon icon="mdi:close" className="h-5 w-5" />
-                                                        </button>
+                                        {Object.values(ModelProvider).map((provider) => {
+                                            const isSupported = SUPPORTED_PROVIDERS.includes(provider);
+
+                                            return (
+                                                <div key={provider} className={isSupported ? "" : "opacity-50"}>
+                                                    <label className="block text-sm font-medium text-gray-700">
+                                                        {MODEL_DISPLAY_NAMES[provider]}
+                                                    </label>
+                                                    <div className="mt-1 relative">
+                                                        <input
+                                                            type="password"
+                                                            className={`block shadow-sm sm:text-sm pr-8 w-full p-1 outline-none text-sm rounded-md bg-transparent border border-gray-500 focus:border-gray-600 
+                                                                ${errors[provider] ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-cyan-500"}
+                                                                ${!isSupported ? "cursor-not-allowed" : ""}`}
+                                                            value={keys[provider] || ""}
+                                                            onPaste={(e) => isSupported && handlePaste(provider, e)}
+                                                            placeholder={
+                                                                isSupported
+                                                                    ? `Paste ${provider} API key here`
+                                                                    : "Coming soon"
+                                                            }
+                                                            readOnly
+                                                            disabled={!isSupported}
+                                                        />
+                                                        {isSupported && keys[provider] && (
+                                                            <button
+                                                                onClick={() => clearKey(provider)}
+                                                                className="absolute inset-y-0 right-0 pr-3 flex items-center cursor-pointer hover:text-gray-600"
+                                                            >
+                                                                <Icon icon="mdi:close" className="h-5 w-5" />
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                    {errors[provider] && (
+                                                        <p className="mt-1 text-sm text-red-600">{errors[provider]}</p>
                                                     )}
                                                 </div>
-                                                {errors[provider] && (
-                                                    <p className="mt-1 text-sm text-red-600">{errors[provider]}</p>
-                                                )}
-                                            </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </DialogPanel>
                             </TransitionChild>

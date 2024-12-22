@@ -1,36 +1,25 @@
 import { LOCAL_STORAGE_NAMESPACE } from "@/constant";
+import { ModelProvider, ModelApiKeys, MODEL_KEY_PREFIXES } from "@/types/models";
 
 export const API_KEYS_LOCALSTORAGE_KEY = `${LOCAL_STORAGE_NAMESPACE}_API_KEYS`;
 
-type ApiKeys = {
-    gemini?: string;
-    openai?: string;
-    anthropic?: string;
-};
-
-const API_KEY_PREFIXES = {
-    gemini: "AI",
-    openai: "sk-",
-    anthropic: "sk-ant-",
-};
-
-export function validateApiKey(provider: keyof ApiKeys, key: string): boolean {
+export function validateApiKey(provider: ModelProvider, key: string): boolean {
     if (!key) return false;
-    return key.startsWith(API_KEY_PREFIXES[provider]);
+    return key.startsWith(MODEL_KEY_PREFIXES[provider]);
 }
 
-export function getStoredApiKeys(): ApiKeys {
+export function getStoredApiKeys(): ModelApiKeys {
     if (typeof window === "undefined") return {};
     const storedKeys = localStorage.getItem(API_KEYS_LOCALSTORAGE_KEY);
     return storedKeys ? JSON.parse(storedKeys) : {};
 }
 
-export function getApiKeyForProvider(provider: keyof ApiKeys): string | undefined {
+export function getApiKeyForProvider(provider: ModelProvider): string | undefined {
     const keys = getStoredApiKeys();
     return keys[provider];
 }
 
-export function saveApiKey(provider: keyof ApiKeys, key: string): boolean {
+export function saveApiKey(provider: ModelProvider, key: string): boolean {
     if (!validateApiKey(provider, key)) {
         return false;
     }
