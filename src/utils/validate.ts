@@ -1,6 +1,4 @@
 export function validateExtrapolatedABI(abi: string, confidenceScores: Record<string, number>): boolean {
-    console.log("validateExtrapolatedABI: ", abi, confidenceScores);
-
     try {
         const parsedABI = JSON.parse(abi);
         // Check if parsedABI is an array

@@ -1,5 +1,5 @@
 import NetworkSelector from "@/components/networkSelector";
-import { ArrowPathIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@iconify/react";
 
 interface Props {
     address: string | undefined;
@@ -26,7 +26,7 @@ export default function ContractDetails({
                 placeholder="Contract Address"
                 value={address}
                 onChange={(e) => handleAddressChange(e.target.value.trim().toLowerCase())}
-                className="h-10 block text-sm w-96 max-w-full px-4 py-2 rounded-md bg-gray-200 outline-none border border-gray-400/50 focus:border-gray-400"
+                className="h-10 block text-sm w-96 max-w-full px-4 py-2 rounded-md bg-[#ccd0d1] outline-none border border-gray-400/50 focus:border-gray-400"
             />
             {shouldShowRetryButton && (
                 <button
@@ -34,7 +34,7 @@ export default function ContractDetails({
                     className="h-10 w-96 max-w-full sm:w-24 flex items-center justify-center gap-2 px-4 py-1 bg-cyan-800 text-white rounded-md hover:bg-cyan-700 transition duration-300"
                 >
                     <span>Retry</span>
-                    <ArrowPathIcon className="h-5 w-5" />
+                    <Icon icon="f7:arrow-2-circlepath-circle" className="h-5 w-5" />
                 </button>
             )}
         </div>
