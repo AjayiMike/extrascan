@@ -1,4 +1,4 @@
-const knownBadRPCs = ["api.mycryptoapi.com", "rpc.blocknative.com", "rpc.flashbots.net"];
+const knownBadRPCs = ["api.mycryptoapi.com", "rpc.blocknative.com", "rpc.flashbots.net", "rpc.sepolia.ethpandaops.io"];
 import {
     ChainidNetworkAPIResponseType,
     EtherscanChainListType,

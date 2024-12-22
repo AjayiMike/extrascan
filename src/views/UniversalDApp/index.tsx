@@ -6,12 +6,12 @@ import ReadContractFunctions from "./components/ReadContractFunctions";
 import WriteContractFunctions from "./components/WriteContractFunctions";
 import ABIComponent from "./components/ABI";
 import { CodeDataType } from "@/types/core";
-import { CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@iconify/react";
 
 type Props = {
     data: CodeDataType;
 };
-const ContractExplorer: React.FC<Props> = ({
+const UniversalDApp: React.FC<Props> = ({
     data: {
         ABI,
         ABIConfidenceScores,
@@ -37,12 +37,12 @@ const ContractExplorer: React.FC<Props> = ({
                     <span className="text-cyan-800 flex items-center gap-1">
                         {isVerified ? (
                             <span className="flex gap-1 items-center">
-                                <CheckCircleIcon className="h-5 w-5 text-green-500" />
+                                <Icon icon="mdi-light:check-circle" className="h-5 w-5 text-green-500" />
                                 <span>Yes</span>
                             </span>
                         ) : (
                             <span className="flex gap-1 items-center">
-                                <XCircleIcon className="h-5 w-5 text-red-500" />
+                                <Icon icon="ph:x-circle-thin" className="h-5 w-5 text-red-500" />
                                 <span>No</span>
                             </span>
                         )}
@@ -108,4 +108,4 @@ const ContractExplorer: React.FC<Props> = ({
     );
 };
 
-export default ContractExplorer;
+export default UniversalDApp;

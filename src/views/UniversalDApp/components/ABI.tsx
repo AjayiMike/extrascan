@@ -1,5 +1,5 @@
 import { Field, Select } from "@headlessui/react";
-import { ChevronDownIcon, ClipboardDocumentCheckIcon, ClipboardIcon } from "@heroicons/react/16/solid";
+import { Icon } from "@iconify/react";
 import clsx from "clsx";
 import { Interface } from "ethers";
 import React, { FC, useMemo, useState } from "react";
@@ -89,9 +89,10 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
                                     </option>
                                 ))}
                             </Select>
-                            <ChevronDownIcon
-                                className="group pointer-events-none absolute top-3 right-2.5 size-4 fill-black/60"
+                            <Icon
+                                icon="mdi-light:chevron-down"
                                 aria-hidden="true"
+                                className="group pointer-events-none absolute top-3 right-2.5 size-4 fill-black/60"
                             />
                         </div>
                     </Field>
@@ -99,17 +100,13 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
 
                 <div className="relative w-full h-[500px]">
                     <button className="absolute top-3 right-2.5 cursor-pointer" onClick={handleCopyABI()}>
-                        {copied ? (
-                            <ClipboardDocumentCheckIcon
-                                className="group pointer-events-none size-4 fill-white"
-                                aria-hidden="true"
-                            />
-                        ) : (
-                            <ClipboardIcon
-                                className="group pointer-events-none size-4 fill-white/70"
-                                aria-hidden="true"
-                            />
-                        )}
+                        <Icon
+                            icon={copied ? "fluent:clipboard-task-16-filled" : "fluent:clipboard-28-filled"}
+                            className={clsx("group pointer-events-none size-4 text-white/70", {
+                                "text-white/70": copied,
+                            })}
+                            aria-hidden="true"
+                        />
                     </button>
 
                     <SyntaxHighlighter

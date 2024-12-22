@@ -1,7 +1,7 @@
 import { getNetworkIcon, getNetworkName } from "@/config/network";
 import useSupportedNetworkData from "@/hooks/useSupportedNetworkData";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
-import { ChevronDownIcon } from "@heroicons/react/24/solid";
+import { Icon } from "@iconify/react";
 import Image from "next/image";
 import React, { Fragment, useEffect } from "react";
 
@@ -52,7 +52,7 @@ const NetworkSelector: React.FC<Props> = ({ networkId, handleNetworkIdChange }) 
             <button
                 type="button"
                 onClick={handleNetworkButtonClick}
-                className="h-10 w-full flex justify-between items-center cursor-pointer bg-white hover:bg-gray-300 px-4 py-2 rounded-md hover:bg-white/25 transition duration-300"
+                className="h-10 w-full flex justify-between items-center cursor-pointer bg-white/50 hover:bg-[#ccd0d1] px-4 py-2 rounded-md hover:bg-white/25 transition duration-300"
             >
                 <div className="flex items-center gap-2">
                     {networkIcon ? (
@@ -72,7 +72,7 @@ const NetworkSelector: React.FC<Props> = ({ networkId, handleNetworkIdChange }) 
                         value={networkName ?? "Select Network"}
                     />
                 </div>
-                <ChevronDownIcon className="group pointer-events-none size-4 fill-black/60" aria-hidden="true" />
+                <Icon icon="mdi-light:chevron-down" />
             </button>
 
             <Transition appear show={networkModalIsOpen} as={Fragment}>

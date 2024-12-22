@@ -1,7 +1,7 @@
 "use client";
 
 import ContractDetails from "@/views/ContractDetails";
-import ContractExplorer from "@/views/ContractExplorer";
+import UniversalDApp from "@/views/UniversalDApp";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CodeDataType } from "@/types/core";
 import { isSupportedNetwork } from "@/config/network";
@@ -117,7 +117,7 @@ export default function Home() {
                     <div className={clsx({ "loader-text": true, extrapolating: isExtrapolating })}></div>
                 </div>
             ) : contractData ? (
-                <ContractExplorer data={contractData as CodeDataType} />
+                <UniversalDApp data={contractData as CodeDataType} />
             ) : (
                 error && (
                     <div className="mt-2">
