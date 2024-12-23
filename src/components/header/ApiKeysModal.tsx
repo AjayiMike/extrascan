@@ -60,7 +60,7 @@ const ApiKeysModal = () => {
         <>
             <button
                 onClick={() => setIsOpen(true)}
-                className="h-10 px-4 py-2 text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 border border-gray-300 rounded-md"
+                className="px-2 sm:px-4 py-[0.4rem] sm:py-[0.6rem] text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-cyan-500 border border-gray-300 rounded-md"
             >
                 <Icon icon="carbon:api-key" className="h-5 w-5" />
             </button>
