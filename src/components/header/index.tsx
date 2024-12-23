@@ -4,10 +4,9 @@ import useInitAppkit from "@/hooks/useInitAppkit";
 import Link from "next/link";
 import logo from "@/assets/logo.png";
 import Image from "next/image";
+import ApiKeysModal from "./ApiKeysModal";
 
-type Props = {};
-
-const Header = (props: Props) => {
+const Header = () => {
     useInitAppkit();
     return (
         <header className="h-16 w-full bg-white shadow-md sticky top-0 z-10">
@@ -21,7 +20,8 @@ const Header = (props: Props) => {
                             </Link>
                         </div>
                     </div>
-                    <div className="h-10">
+                    <div className="h-10 flex items-center gap-2">
+                        <ApiKeysModal />
                         <appkit-button />
                     </div>
                 </div>

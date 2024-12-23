@@ -104,7 +104,7 @@ const ContractFunctionSimpleInputField: FC<Props> = ({
                             <Icon icon="mynaui:x-circle-solid" className="h-5 w-5" />
                         </button>
                     )}
-                    {data.type === "address" && (
+                    {data.type === "address" && Boolean(address) && (
                         <button
                             onClick={() => handleAddressButtonClick(address)}
                             disabled={isDisabled}
