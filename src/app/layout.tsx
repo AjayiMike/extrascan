@@ -11,8 +11,48 @@ import { Suspense } from "react";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-    title: "Extrascan",
-    description: "smart contract ABI extrapolator",
+    title: "Extrascan - Smart Contract ABI Extrapolator",
+    description:
+        "Extrascan is a powerful tool for interacting with smart contracts and extracting their ABI, whether verified or not. Supports multiple blockchain networks and AI-powered ABI extrapolation.",
+    keywords: [
+        "smart contract",
+        "blockchain",
+        "ABI",
+        "ethereum",
+        "web3",
+        "smart contract verification",
+        "contract interaction",
+        "blockchain explorer",
+    ],
+    robots: {
+        index: true,
+        follow: true,
+        googleBot: {
+            index: true,
+            follow: true,
+            "max-video-preview": -1,
+            "max-image-preview": "large",
+            "max-snippet": -1,
+        },
+    },
+    openGraph: {
+        title: "Extrascan - Smart Contract ABI Extrapolator",
+        description:
+            "Interact with smart contracts and get their ABI, verified or not. Supports multiple blockchain networks.",
+        url: "https://extrascan.xyz",
+        siteName: "Extrascan",
+        locale: "en_US",
+        type: "website",
+    },
+    twitter: {
+        card: "summary_large_image",
+        title: "Extrascan - Smart Contract ABI Extrapolator",
+        description:
+            "Interact with smart contracts and get their ABI, verified or not. Supports multiple blockchain networks.",
+    },
+    alternates: {
+        canonical: "https://extrascan.xyz",
+    },
 };
 
 export default function RootLayout({
