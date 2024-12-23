@@ -37,12 +37,12 @@ const UniversalDApp: React.FC<Props> = ({
                     <span className="text-cyan-800 flex items-center gap-1">
                         {isVerified ? (
                             <span className="flex gap-1 items-center">
-                                <Icon icon="mdi-light:check-circle" className="h-5 w-5 text-green-500" />
+                                <Icon icon="ic:outline-check-circle" className="h-5 w-5 text-green-500" />
                                 <span>Yes</span>
                             </span>
                         ) : (
                             <span className="flex gap-1 items-center">
-                                <Icon icon="ph:x-circle-thin" className="h-5 w-5 text-red-500" />
+                                <Icon icon="lucide:circle-x" className="h-5 w-5 text-red-500" />
                                 <span>No</span>
                             </span>
                         )}
