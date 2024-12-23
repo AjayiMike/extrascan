@@ -8,6 +8,8 @@ import { isSupportedNetwork } from "@/config/network";
 import { isAddress } from "@/utils/address";
 import clsx from "clsx";
 import { useQueryState } from "nuqs";
+import { getStoredApiKeys } from "@/utils/apiKeys";
+import { ModelProvider } from "@/types/models";
 
 export default function Home() {
     const [contractData, setContractData] = useState<CodeDataType | null>(null);
@@ -46,6 +48,16 @@ export default function Home() {
                     return;
                 }
 
+                const apiKeys = getStoredApiKeys();
+                const hasValidApiKey = Object.values(ModelProvider).some((provider) => apiKeys[provider]);
+
+                if (!hasValidApiKey) {
+                    setError(
+                        "Contract is not verified. Please provide at least one AI model API key in settings to extrapolate the ABI."
+                    );
+                    return;
+                }
+
                 console.debug("extrapolating ABI...");
                 setIsExtrapolating(true);
 
@@ -58,6 +70,8 @@ export default function Home() {
                     body: JSON.stringify({
                         networkId: Number(networkId),
                         address: data.address,
+                        apiKeys,
+                        preferredProvider: localStorage.getItem("preferred_provider") || undefined,
                     }),
                 });
 

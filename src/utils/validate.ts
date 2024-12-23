@@ -1,11 +1,10 @@
-export function validateExtrapolatedABI(abi: string, confidenceScores: Record<string, number>): boolean {
+export function validateExtrapolatedABI(extrapolatedAbi: any, confidenceScores: Record<string, number>): boolean {
     try {
-        const parsedABI = JSON.parse(abi);
-        // Check if parsedABI is an array
-        if (!Array.isArray(parsedABI)) return false;
+        // Check if extrapolatedAbi is an array
+        if (!Array.isArray(extrapolatedAbi)) return false;
 
         // Validate each function in the ABI
-        for (const item of parsedABI) {
+        for (const item of extrapolatedAbi) {
             // Check required fields
             if (!item.name || !item.inputs || !item.outputs || !item.stateMutability) {
                 return false; // Missing required fields
