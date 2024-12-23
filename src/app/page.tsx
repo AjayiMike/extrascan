@@ -114,48 +114,56 @@ export default function Home() {
     }, [networkId, address]);
 
     return (
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="mb-4">
-                <h1 className="text-2xl font-bold text-gray-900">Extrascan</h1>
-                <p className="text-gray-500">Interact with smart contracts and get its ABI, verified or not.</p>
-            </div>
-            <ContractDetails
-                address={address ?? ""}
-                networkId={networkId ?? undefined}
-                handleAddressChange={(value) => setAddress(value)}
-                handleNetworkIdChange={(value) => setNetworkId(value)}
-            />
-            {isFetching ? (
-                <div className="flex gap-4 items-center">
-                    <div className="loader-cube" />
-                    <div className={clsx({ "loader-text": true, extrapolating: isExtrapolating })}></div>
-                </div>
-            ) : contractData ? (
-                <UniversalDApp data={contractData as CodeDataType} />
-            ) : (
-                error && (
-                    <div className="mt-2">
-                        <div className="flex gap-4 items-center">
-                            <h3 className="font-bold text-2xl">Error</h3>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                className="h-6 w-6 text-red-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth="2"
-                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                                />
-                            </svg>
-                        </div>
-                        <p className="text-red-400 text-base">{error}</p>
+        <article className="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <section className="mb-4">
+                <h1 className="text-2xl font-bold text-gray-900">Extrascan - Smart Contract ABI Extrapolator</h1>
+                <p className="text-gray-500">
+                    A powerful tool to interact with smart contracts and extract their ABI. Works with both verified and
+                    unverified contracts across multiple blockchain networks.
+                </p>
+            </section>
+            <section aria-label="Contract Input Form">
+                <ContractDetails
+                    address={address ?? ""}
+                    networkId={networkId ?? undefined}
+                    handleAddressChange={(value) => setAddress(value)}
+                    handleNetworkIdChange={(value) => setNetworkId(value)}
+                />
+            </section>
+            <section aria-label="Contract Results" className="mt-6">
+                {isFetching ? (
+                    <div className="flex gap-4 items-center" role="status" aria-label="Loading">
+                        <div className="loader-cube" />
+                        <div className={clsx({ "loader-text": true, extrapolating: isExtrapolating })}></div>
                     </div>
-                )
-            )}
-        </div>
+                ) : contractData ? (
+                    <UniversalDApp data={contractData as CodeDataType} />
+                ) : (
+                    error && (
+                        <div className="mt-2" role="alert">
+                            <div className="flex gap-4 items-center">
+                                <h2 className="font-bold text-2xl">Error</h2>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-6 w-6 text-red-500"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    aria-hidden="true"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth="2"
+                                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                                    />
+                                </svg>
+                            </div>
+                            <p className="text-red-400 text-base">{error}</p>
+                        </div>
+                    )
+                )}
+            </section>
+        </article>
     );
 }
