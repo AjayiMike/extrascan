@@ -6,9 +6,9 @@
         "prepare": "husky",
         "format": "prettier --write .",
         "lint": "pnpm -r lint",
-        "dev:webapp": "pnpm run dev --filter webapp",
-        "build:webapp": "pnpm run build --filter webapp",
-        "start:webapp": "pnpm run start --filter webapp",
+        "dev:webapp": "pnpm --filter webapp run dev",
+        "build:webapp": "pnpm --filter webapp run build",
+        "start:webapp": "pnpm --filter webapp run start",
         "build": "pnpm -r build"
     },
     "keywords": [],
