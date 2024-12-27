@@ -1,8 +1,8 @@
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Icon } from "@iconify/react";
 import { Fragment, useEffect, useState } from "react";
-import { API_KEYS_LOCALSTORAGE_KEY, validateApiKey } from "@/utils/apiKeys";
-import { ModelProvider, ModelApiKeys, MODEL_DISPLAY_NAMES, SUPPORTED_PROVIDERS } from "@/types/models";
+import { API_KEYS_LOCALSTORAGE_KEY, validateApiKey } from "@extrascan/shared/utils";
+import { ModelProvider, ModelApiKeys, MODEL_DISPLAY_NAMES, SUPPORTED_PROVIDERS } from "@extrascan/shared/types";
 
 const ApiKeysModal = () => {
     const [isOpen, setIsOpen] = useState(false);

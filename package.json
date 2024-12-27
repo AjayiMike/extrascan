@@ -9,7 +9,10 @@
         "dev:webapp": "pnpm --filter webapp run dev",
         "build:webapp": "pnpm --filter webapp run build",
         "start:webapp": "pnpm --filter webapp run start",
-        "build": "pnpm -r build"
+        "build": "pnpm -r build",
+        "build:shared": "pnpm --filter @extrascan/shared build",
+        "dev:shared": "pnpm --filter @extrascan/shared dev",
+        "clean": "pnpm -r clean"
     },
     "keywords": [],
     "author": "ajayimikeofficial@gmail.com",

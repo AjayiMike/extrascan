@@ -1,11 +1,11 @@
 "use client";
-import { shortenAddress } from "@/utils/address";
+import { shortenAddress } from "@extrascan/shared/utils";
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import ReadContractFunctions from "./components/ReadContractFunctions";
 import WriteContractFunctions from "./components/WriteContractFunctions";
 import ABIComponent from "./components/ABI";
-import { CodeDataType } from "@/types/core";
+import { CodeDataType } from "@extrascan/shared/types";
 import { Icon } from "@iconify/react";
 
 type Props = {

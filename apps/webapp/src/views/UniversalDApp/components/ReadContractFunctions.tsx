@@ -1,26 +1,24 @@
 "use client";
-import { useContract } from "@/hooks/useContract";
-import { escapeRegExp, numberInputRegex } from "@/utils/regex";
+import { useContract } from "@extrascan/shared/hooks";
+import { escapeRegExp, numberInputRegex } from "@extrascan/shared/utils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { Fragment, useCallback, useMemo, useState } from "react";
 import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { Contract, JsonFragment } from "ethers";
-import useErrorDecoder from "@/hooks/useErrorDecoder";
-import { getFragmentConfidenceScore } from "@/utils/confidenceScore";
-import ContractFunctionSimpleInputField from "./inputComponents/ContractFunctionSimpleInputField";
+import { useErrorDecoder } from "@extrascan/shared/hooks";
+import { getFragmentConfidenceScore } from "@extrascan/shared/utils";
 import {
     getFieldLabel,
     getFunctionSignatureFromFragment,
     isReadMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "@/utils/contractfunctions";
-import { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "@/types/ABI";
+} from "@extrascan/shared/utils";
+import { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "@extrascan/shared/types";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import ContractFunctionFieldAccordion from "./inputComponents/ContractFunctionFieldAccordion";
-import ContractFunctionArrayInputField from "./inputComponents/ContractFunctionArrayInputField";
-import ContractFunctionTupleInputField from "./inputComponents/ContractFunctionTupleInputField";
 import { Icon } from "@iconify/react";
+
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "@extrascan/shared/components";
 
 type Props = {
     networkId: number;
@@ -216,7 +214,7 @@ const ReadMethod: React.FC<{
                                 const arrayMatch = matchArray(input.type as string);
 
                                 if ("components" in input && input.components && input.type === "tuple") {
-                                    return <ContractFunctionTupleInputField key={i} {...props} />;
+                                    return <TupleInputField key={i} {...props} />;
                                 }
 
                                 if (arrayMatch) {
@@ -224,20 +222,20 @@ const ReadMethod: React.FC<{
                                         const fieldsWithErrors = Object.keys(formApi.formState.errors);
                                         const isInvalid = fieldsWithErrors.some((field) => field.startsWith(i + ":"));
                                         return (
-                                            <ContractFunctionFieldAccordion
+                                            <FieldAccordion
                                                 key={i}
                                                 level={0}
                                                 label={getFieldLabel(input)}
                                                 isInvalid={isInvalid}
                                             >
-                                                <ContractFunctionArrayInputField {...props} />
-                                            </ContractFunctionFieldAccordion>
+                                                <ArrayInputField {...props} />
+                                            </FieldAccordion>
                                         );
                                     }
-                                    return <ContractFunctionArrayInputField key={i} {...props} />;
+                                    return <ArrayInputField key={i} {...props} />;
                                 }
 
-                                return <ContractFunctionSimpleInputField key={i} {...props} path={`${i}`} />;
+                                return <SimpleInputField key={i} {...props} path={`${i}`} />;
                             })}
                             {!hasConstantOutputs && (
                                 <button

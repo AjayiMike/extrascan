@@ -3,13 +3,13 @@
 import ContractDetails from "@/views/ContractDetails";
 import UniversalDApp from "@/views/UniversalDApp";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { CodeDataType } from "@/types/core";
-import { isSupportedNetwork } from "@/config/network";
-import { isAddress } from "@/utils/address";
+import { CodeDataType } from "@extrascan/shared/types";
+import { isSupportedNetwork } from "@extrascan/shared/configs";
+import { isAddress } from "@extrascan/shared/utils";
 import clsx from "clsx";
 import { useQueryState } from "nuqs";
-import { getStoredApiKeys } from "@/utils/apiKeys";
-import { ModelProvider } from "@/types/models";
+import { getStoredApiKeys } from "@extrascan/shared/utils";
+import { ModelProvider } from "@extrascan/shared/types";
 
 export default function Home() {
     const [contractData, setContractData] = useState<CodeDataType | null>(null);

@@ -1,4 +1,4 @@
-import NetworkSelector from "@/components/networkSelector";
+import { NetworkSelector } from "@extrascan/shared/components";
 import { Icon } from "@iconify/react";
 
 interface Props {

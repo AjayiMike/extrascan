@@ -1,14 +1,14 @@
-import { getBytecode } from "@/utils/bytecode";
-import { getContractCreationInfo } from "@/utils/contractCreationBlock";
-import { fetchFunctionTextSignaturesFromPublicDatabases } from "@/utils/functionSignature";
+import { getBytecode } from "@extrascan/shared/utils";
+import { getContractCreationInfo } from "@extrascan/shared/utils";
+import { fetchFunctionTextSignaturesFromPublicDatabases } from "@extrascan/shared/utils";
 import { whatsabi } from "@shazow/whatsabi";
-import { getCachedData, setCachedData } from "@/utils/redisCache";
-import { isAddress } from "@/utils/address";
+import { RedisCache } from "@extrascan/shared/utils";
+import { isAddress } from "@extrascan/shared/utils";
 import { getAddress } from "ethers";
-import { getSupportedNetworks } from "@/config/network";
-import { validateExtrapolatedABI } from "@/utils/validate";
-import ModelProviderService from "@/utils/modelProviders";
-import { ModelProvider, ModelApiKeys, MODEL_KEY_PREFIXES } from "@/types/models";
+import { getSupportedNetworks } from "@extrascan/shared/configs";
+import { validateExtrapolatedABI } from "@extrascan/shared/utils";
+import { ModelProviderService } from "@extrascan/shared/utils";
+import { ModelProvider, ModelApiKeys, MODEL_KEY_PREFIXES } from "@extrascan/shared/types";
 
 function validateApiKeys(apiKeys: ModelApiKeys): boolean {
     // At least one valid API key must be provided
@@ -61,14 +61,21 @@ export async function POST(request: Request) {
             );
         }
 
+        const redisCache = new RedisCache(
+            process.env.REDIS_HOST as string,
+            Number(process.env.REDIS_PORT),
+            process.env.REDIS_PASSWORD as string
+        );
+
         const cacheKey = `extrapolated:${getAddress(address)}-${networkId}`;
-        const cachedData = await getCachedData(cacheKey);
+        const cachedData = await redisCache.getCachedData(cacheKey);
         if (cachedData) {
             return Response.json(cachedData, { status: 200 });
         }
 
         const bytecode = await getBytecode(networkId, address);
         const selectors = whatsabi.selectorsFromBytecode(bytecode);
+
         if (!selectors.length) {
             return Response.json(
                 {
@@ -89,19 +96,19 @@ export async function POST(request: Request) {
                 { status: 400 }
             );
         }
-        console.log("apiKeys: ", apiKeys);
 
         const modelProvider = new ModelProviderService(apiKeys);
-        console.log("preferredProvider_route: ", preferredProvider);
 
         const { ABI: ABI, confidence: ABIConfidenceScores } = await modelProvider.extrapolateABI(
             functionTextSignature,
             preferredProvider as ModelProvider | undefined
         );
 
-        console.log("ABI, confidence: ABIConfidenceScores: ", { ABI: ABI[0], confidence: ABIConfidenceScores });
-
-        const { blockNumber, deployer } = await getContractCreationInfo(networkId, address);
+        const { blockNumber, deployer } = await getContractCreationInfo(
+            process.env.ETHERSCAN_API_KEY as string,
+            networkId,
+            address
+        );
 
         const valid = validateExtrapolatedABI(ABI, ABIConfidenceScores);
         if (!valid) {
@@ -116,7 +123,7 @@ export async function POST(request: Request) {
             address,
         };
 
-        await setCachedData(cacheKey, responseData, 3600);
+        await redisCache.setCachedData(cacheKey, responseData, 3600);
 
         return Response.json(responseData, { status: 200 });
     } catch (error: any) {

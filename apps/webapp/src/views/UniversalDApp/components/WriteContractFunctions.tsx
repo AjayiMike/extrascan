@@ -1,16 +1,16 @@
 "use client";
 
-import { useContract } from "@/hooks/useContract";
-import useErrorDecoder from "@/hooks/useErrorDecoder";
-import { useNetworkDataForChainId } from "@/hooks/useSupportedNetworkData";
-import { getFragmentConfidenceScore } from "@/utils/confidenceScore";
+import { useContract } from "@extrascan/shared/hooks";
+import { useErrorDecoder } from "@extrascan/shared/hooks";
+import { useNetworkDataForChainId } from "@extrascan/shared/hooks";
+import { getFragmentConfidenceScore } from "@extrascan/shared/utils";
 import {
     getFieldLabel,
     getFunctionSignatureFromFragment,
     isWriteMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "@/utils/contractfunctions";
+} from "@extrascan/shared/utils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import { Contract } from "ethers";
@@ -18,12 +18,10 @@ import { JsonFragment } from "ethers";
 import { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { Fragment, useCallback, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import ContractFunctionFieldAccordion from "./inputComponents/ContractFunctionFieldAccordion";
-import ContractFunctionArrayInputField from "./inputComponents/ContractFunctionArrayInputField";
-import ContractFunctionSimpleInputField from "./inputComponents/ContractFunctionSimpleInputField";
-import { ContractMethodFormFields, ContractMethodResult } from "@/types/ABI";
-import ContractFunctionTupleInputField from "./inputComponents/ContractFunctionTupleInputField";
+import { ContractMethodFormFields, ContractMethodResult } from "@extrascan/shared/types";
 import { Icon } from "@iconify/react";
+
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "@extrascan/shared/components";
 
 type Props = {
     networkId: number;
@@ -175,7 +173,7 @@ const WriteMethod: React.FC<{
                                 const arrayMatch = matchArray(input.type as string);
 
                                 if ("components" in input && input.components && input.type === "tuple") {
-                                    return <ContractFunctionTupleInputField key={i} {...props} />;
+                                    return <TupleInputField key={i} {...props} />;
                                 }
 
                                 if (arrayMatch) {
@@ -183,20 +181,20 @@ const WriteMethod: React.FC<{
                                         const fieldsWithErrors = Object.keys(formApi.formState.errors);
                                         const isInvalid = fieldsWithErrors.some((field) => field.startsWith(i + ":"));
                                         return (
-                                            <ContractFunctionFieldAccordion
+                                            <FieldAccordion
                                                 key={i}
                                                 level={0}
                                                 label={getFieldLabel(input)}
                                                 isInvalid={isInvalid}
                                             >
-                                                <ContractFunctionArrayInputField {...props} />
-                                            </ContractFunctionFieldAccordion>
+                                                <ArrayInputField {...props} />
+                                            </FieldAccordion>
                                         );
                                     }
-                                    return <ContractFunctionArrayInputField key={i} {...props} />;
+                                    return <ArrayInputField key={i} {...props} />;
                                 }
 
-                                return <ContractFunctionSimpleInputField key={i} {...props} path={`${i}`} />;
+                                return <SimpleInputField key={i} {...props} path={`${i}`} />;
                             })}
                             <div>
                                 <button
