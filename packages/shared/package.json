@@ -78,5 +78,15 @@
         "ethers-decode-error": "^2.1.3",
         "react-hook-form": "^7.53.2",
         "@headlessui/react": "^2.2.0"
+    },
+    "browser": {
+        "crypto": false,
+        "stream": false,
+        "util": false,
+        "net": false,
+        "tls": false,
+        "url": false,
+        "dns": false,
+        "assert": false
     }
 }

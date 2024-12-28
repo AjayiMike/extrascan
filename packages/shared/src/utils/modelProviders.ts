@@ -33,7 +33,6 @@ export class ModelProviderService {
 
     constructor(apiKeys: ModelApiKeys) {
         if (apiKeys[ModelProvider.GEMINI]) {
-            // eslint-disable-next-line @typescript-eslint/no-require-imports
             const { GoogleGenerativeAI } = require("@google/generative-ai");
             this.geminiModel = new GoogleGenerativeAI(apiKeys[ModelProvider.GEMINI]).getGenerativeModel({
                 model: "gemini-1.5-flash",
