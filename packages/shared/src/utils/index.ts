@@ -1,6 +1,7 @@
 export * from "./address";
 export * from "./apiKeys";
 export * from "./bytecode";
+export * from "./cacheKey";
 export * from "./calculateGasMargin";
 export * from "./code";
 export * from "./confidenceScore";
