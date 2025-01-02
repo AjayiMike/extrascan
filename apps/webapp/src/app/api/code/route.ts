@@ -2,6 +2,7 @@ import { getBytecode } from "@extrascan/shared/utils";
 import { loadCodeFromEtherscan } from "@extrascan/shared/utils";
 import { getContractCreationInfo } from "@extrascan/shared/utils";
 import { RedisCache } from "@extrascan/shared/utils";
+import { generateCacheKey, CacheKeyPrefix } from "@extrascan/shared/utils";
 
 export async function POST(request: Request) {
     try {
@@ -13,7 +14,11 @@ export async function POST(request: Request) {
             process.env.REDIS_PASSWORD as string
         );
 
-        const cacheKey = `code:${address}-${networkId}`;
+        const cacheKey = generateCacheKey(CacheKeyPrefix.CODE, {
+            address,
+            networkId,
+        });
+
         const cachedData = await redisCache.getCachedData(cacheKey);
 
         if (cachedData) {
