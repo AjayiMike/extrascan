@@ -4,11 +4,11 @@ import { fetchFunctionTextSignaturesFromPublicDatabases } from "@extrascan/share
 import { whatsabi } from "@shazow/whatsabi";
 import { RedisCache } from "@extrascan/shared/utils";
 import { isAddress } from "@extrascan/shared/utils";
-import { getAddress } from "ethers";
 import { getSupportedNetworks } from "@extrascan/shared/configs";
 import { validateExtrapolatedABI } from "@extrascan/shared/utils";
 import { ModelProviderService } from "@extrascan/shared/utils";
 import { ModelProvider, ModelApiKeys, MODEL_KEY_PREFIXES } from "@extrascan/shared/types";
+import { generateCacheKey, CacheKeyPrefix } from "@extrascan/shared/utils";
 
 function validateApiKeys(apiKeys: ModelApiKeys): boolean {
     // At least one valid API key must be provided
@@ -25,21 +25,7 @@ function validatePreferredProvider(provider: string | undefined): provider is Mo
 
 export async function POST(request: Request) {
     try {
-        const { networkId, address, apiKeys, preferredProvider } = await request.json();
-
-        // Validate basic request parameters
-        if (!isAddress(address)) {
-            return Response.json({ error: "Invalid address format" }, { status: 400 });
-        }
-        if (typeof networkId !== "number") {
-            return Response.json({ error: "Invalid networkId, networkId must be a number" }, { status: 400 });
-        }
-
-        // Validate network support
-        const supportedNetworks = await getSupportedNetworks();
-        if (supportedNetworks.findIndex((network) => network.chainId === Number(networkId)) === -1) {
-            return Response.json({ error: "Unsupported network" }, { status: 400 });
-        }
+        const { networkId, address, bytecode, apiKeys, preferredProvider } = await request.json();
 
         // Validate API keys
         if (!apiKeys || !validateApiKeys(apiKeys)) {
@@ -61,20 +47,54 @@ export async function POST(request: Request) {
             );
         }
 
+        // Either bytecode or (networkId + address) must be provided
+        if (!bytecode && (!networkId || !address)) {
+            return Response.json(
+                {
+                    error: "Either bytecode or both networkId and address must be provided",
+                },
+                { status: 400 }
+            );
+        }
+
+        if (networkId && address) {
+            // Validate address format
+            if (!isAddress(address)) {
+                return Response.json({ error: "Invalid address format" }, { status: 400 });
+            }
+
+            // Validate networkId
+            if (typeof networkId !== "number") {
+                return Response.json({ error: "Invalid networkId, networkId must be a number" }, { status: 400 });
+            }
+
+            // Validate network support
+            const supportedNetworks = await getSupportedNetworks();
+            if (supportedNetworks.findIndex((network) => network.chainId === Number(networkId)) === -1) {
+                return Response.json({ error: "Unsupported network" }, { status: 400 });
+            }
+        }
+
         const redisCache = new RedisCache(
             process.env.REDIS_HOST as string,
             Number(process.env.REDIS_PORT),
             process.env.REDIS_PASSWORD as string
         );
 
-        const cacheKey = `extrapolated:${getAddress(address)}-${networkId}`;
+        const cacheKey = generateCacheKey(CacheKeyPrefix.EXTRAPOLATED, {
+            bytecode,
+            address,
+            networkId,
+        });
+
         const cachedData = await redisCache.getCachedData(cacheKey);
         if (cachedData) {
             return Response.json(cachedData, { status: 200 });
         }
 
-        const bytecode = await getBytecode(networkId, address);
-        const selectors = whatsabi.selectorsFromBytecode(bytecode);
+        // Get bytecode either from input or by fetching
+        const contractBytecode = bytecode || (await getBytecode(networkId, address));
+        const selectors = whatsabi.selectorsFromBytecode(contractBytecode);
 
         if (!selectors.length) {
             return Response.json(
@@ -92,22 +112,16 @@ export async function POST(request: Request) {
 
         if (!functionTextSignature.length) {
             return Response.json(
-                { error: "Exracted function signatures not found in public database" },
+                { error: "Extracted function signatures not found in public database" },
                 { status: 400 }
             );
         }
 
         const modelProvider = new ModelProviderService(apiKeys);
 
-        const { ABI: ABI, confidence: ABIConfidenceScores } = await modelProvider.extrapolateABI(
+        const { ABI, confidence: ABIConfidenceScores } = await modelProvider.extrapolateABI(
             functionTextSignature,
             preferredProvider as ModelProvider | undefined
-        );
-
-        const { blockNumber, deployer } = await getContractCreationInfo(
-            process.env.ETHERSCAN_API_KEY as string,
-            networkId,
-            address
         );
 
         const valid = validateExtrapolatedABI(ABI, ABIConfidenceScores);
@@ -115,13 +129,25 @@ export async function POST(request: Request) {
             throw new Error("Invalid ABI format returned from model");
         }
 
-        const responseData = {
+        let responseData: any = {
             ABI: JSON.stringify(ABI),
             ABIConfidenceScores,
-            startBlock: blockNumber,
-            deployer,
-            address,
         };
+
+        // Add contract creation info only if address and networkId are provided
+        if (networkId && address) {
+            const { blockNumber, deployer } = await getContractCreationInfo(
+                process.env.ETHERSCAN_API_KEY as string,
+                networkId,
+                address
+            );
+            responseData = {
+                ...responseData,
+                startBlock: blockNumber,
+                deployer,
+                address,
+            };
+        }
 
         await redisCache.setCachedData(cacheKey, responseData, 3600);
 
