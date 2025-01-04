@@ -51,19 +51,20 @@ export const fetchDeployContractTransactionFromEtherscan = async (
 };
 
 export const fetchContractCreationHashWithRetry = async (url: string, retryCount: number): Promise<any> => {
-    let json;
     for (let i = 0; i < retryCount; i++) {
         try {
             const result = await fetch(url);
-            json = await result.json();
+            if (!result.ok) throw new Error(`HTTP error! status: ${result.status}`);
+            const json = await result.json();
             if (json.status !== "0") {
                 return json;
             }
         } catch (error) {
-            console.debug("Failed to fetch contract creation transaction hash: ", error);
+            console.debug(`Attempt ${i + 1} failed to fetch contract creation transaction hash: ${error}`);
+            if (i === retryCount - 1)
+                throw new Error(`Failed to fetch contract creation transaction hash after ${retryCount} retries`);
         }
     }
-    throw new Error(`Failed to fetch contract creation transaction hash`);
 };
 
 export const fetchTransactionByHashFromRPC = async (

@@ -11,6 +11,9 @@ export const loadCodeFromEtherscan = async (
         const response = await fetch(
             `https://api.etherscan.io/v2/api?chainid=${networkId}&module=contract&action=getsourcecode&address=${address}&apikey=${etherscanApiKey}`
         );
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         const data = await response.json();
 
         // Etherscan returns a JSON object that has a `status`, a `message` and
