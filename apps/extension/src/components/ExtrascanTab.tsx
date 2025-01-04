@@ -17,7 +17,7 @@ export default function ExtrascanTab() {
                 const bytecode = codeElement.innerHTML.trim();
 
                 // First check if contract is verified
-                const response = await fetch("https://www.extrascan.xyz/api/code/", {
+                const response = await fetch("https://www.extrascan.xyz/api/code", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
