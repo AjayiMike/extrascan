@@ -9,6 +9,8 @@ const nextConfig = {
         ],
     },
     webpack: (config, { isServer }) => {
+        config.externals.push("pino-pretty"); // to resolve "Module not found: Can't resolve 'pino-pretty'" error at build time
+        // to resolve ioredis error
         if (!isServer) {
             config.resolve.fallback.fs = false;
             config.resolve.fallback.dns = false;

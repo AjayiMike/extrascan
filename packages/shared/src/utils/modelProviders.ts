@@ -1,8 +1,9 @@
-import { HarmBlockThreshold, HarmCategory } from "@google/generative-ai";
 import OpenAI from "openai";
 import Anthropic from "@anthropic-ai/sdk";
 import type { ModelApiKeys } from "@/types/models";
 import { ModelProvider } from "@/types/models";
+
+import { HarmBlockThreshold, HarmCategory, GoogleGenerativeAI } from "@google/generative-ai";
 
 interface ExtrapolationResult {
     ABI: string;
@@ -33,10 +34,16 @@ export class ModelProviderService {
 
     constructor(apiKeys: ModelApiKeys) {
         if (apiKeys[ModelProvider.GEMINI]) {
-            const { GoogleGenerativeAI } = require("@google/generative-ai");
             this.geminiModel = new GoogleGenerativeAI(apiKeys[ModelProvider.GEMINI]).getGenerativeModel({
                 model: "gemini-1.5-flash",
                 systemInstruction: SYSTEM_PROMPT,
+                // generationConfig: {
+                //     temperature: 1,
+                //     topP: 0.95,
+                //     topK: 64,
+                //     maxOutputTokens: 8192,
+                //     responseMimeType: "application/json",
+                // },
                 safetySettings: [
                     {
                         category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -77,15 +84,9 @@ export class ModelProviderService {
     private async extrapolateWithGemini(signatures: string[]): Promise<ExtrapolationResult> {
         if (!this.geminiModel) throw new Error("Gemini API key not provided");
 
-        const result = await this.geminiModel.generateContent(signatures, {
-            temperature: 1,
-            topP: 0.95,
-            topK: 64,
-            maxOutputTokens: 8192,
-            responseMimeType: "application/json",
-        });
+        const result = await this.geminiModel.generateContent(signatures);
 
-        const response = await result.response;
+        const response = result.response;
         const text = response.text();
         return JSON.parse(text.replace(/```json\n|```/g, ""));
     }

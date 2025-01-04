@@ -11,7 +11,7 @@ export async function getStoredApiKeys(): Promise<ModelApiKeys> {
 export const setStoredApiKey = async (provider: ModelProvider, key: string): Promise<void> => {
     try {
         const currentKeys = await getStoredApiKeys();
-        await chrome.storage.local.set({
+        await chrome.storage.sync.set({
             apiKeys: {
                 ...currentKeys,
                 [provider]: key,
