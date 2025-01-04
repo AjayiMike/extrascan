@@ -37,13 +37,6 @@ export class ModelProviderService {
             this.geminiModel = new GoogleGenerativeAI(apiKeys[ModelProvider.GEMINI]).getGenerativeModel({
                 model: "gemini-1.5-flash",
                 systemInstruction: SYSTEM_PROMPT,
-                // generationConfig: {
-                //     temperature: 1,
-                //     topP: 0.95,
-                //     topK: 64,
-                //     maxOutputTokens: 8192,
-                //     responseMimeType: "application/json",
-                // },
                 safetySettings: [
                     {
                         category: HarmCategory.HARM_CATEGORY_HARASSMENT,
