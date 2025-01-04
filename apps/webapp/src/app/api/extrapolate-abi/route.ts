@@ -160,3 +160,8 @@ export async function POST(request: Request) {
         );
     }
 }
+
+// on vercel, serverless funntions are set to run for 10 seconds by default, but can be increased to up to 30 seconds
+// we need to set the maxDuration to 20 seconds to allow for the abi extrapolation to complete
+// otherwise, the function will be terminated by vercel and we will get a 502/504 error on the frontend
+export const maxDuration = 20;
