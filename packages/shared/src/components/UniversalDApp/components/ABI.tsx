@@ -1,12 +1,19 @@
+"use client";
+
 import { Field, Select } from "@headlessui/react";
 import { Icon } from "@iconify/react";
 import clsx from "clsx";
-import { Interface } from "ethers";
-import React, { FC, useMemo, useState } from "react";
+import { Interface as EthersInterface } from "ethers";
+import React, { useMemo, useState, type FC } from "react";
 import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
 import { nord } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { toast } from "react-toastify";
 import { useCopyToClipboard } from "usehooks-ts";
+
+type ABIFormatOption = {
+    value: "json" | "human readable" | "minimal human readable";
+    label: string;
+};
 
 type Props = {
     isExtrapolated: boolean;
@@ -15,25 +22,26 @@ type Props = {
     ABI?: string;
 };
 
-const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) => {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) => {
     const [formartedABI, setFormartedABI] = useState<Array<string> | string>(
         JSON.stringify(JSON.parse(ABI as string), null, 2)
     );
 
-    const ABIFormatOptions = [
+    const ABIFormatOptions: ABIFormatOption[] = [
         { value: "json", label: "JSON" },
         { value: "human readable", label: "Human Readable" },
         { value: "minimal human readable", label: "Minimal Human Readable" },
     ];
 
-    const handleSelectChange = (selectedOption: any) => {
+    const handleSelectChange = (selectedOption: ABIFormatOption) => {
         const formatType = selectedOption.value;
         switch (formatType) {
             case "human readable":
-                setFormartedABI(Interface.from(JSON.parse(ABI as string)).format());
+                setFormartedABI(EthersInterface.from(JSON.parse(ABI as string)).format());
                 break;
             case "minimal human readable":
-                setFormartedABI(Interface.from(JSON.parse(ABI as string)).format(true));
+                setFormartedABI(EthersInterface.from(JSON.parse(ABI as string)).format(true));
                 break;
             default:
                 setFormartedABI(JSON.stringify(JSON.parse(ABI as string), null, 2));
@@ -47,6 +55,7 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
         return `[\n  ${formartedABI.map((x) => `"${x}"`).join(",\n  ")} \n]`;
     }, [formartedABI]);
 
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [_, copy] = useCopyToClipboard();
     const [copied, setCopied] = useState(false);
     const handleCopyABI = () => () => {
@@ -57,8 +66,8 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
                     setCopied(false);
                 }, 500);
             })
-            .catch((error) => {
-                toast.error("Failed to copy: ", error);
+            .catch((error: Error) => {
+                toast.error(`Failed to copy: ${error.message}`);
             });
     };
 
@@ -79,7 +88,9 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
                                 )}
                                 onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
                                     handleSelectChange(
-                                        ABIFormatOptions.find((option) => option.value === e.target.value)
+                                        ABIFormatOptions.find(
+                                            (option) => option.value === e.target.value
+                                        ) as ABIFormatOption
                                     )
                                 }
                             >
@@ -122,5 +133,3 @@ const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) 
         </div>
     );
 };
-
-export default ABIComponent;

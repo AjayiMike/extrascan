@@ -1,7 +1,7 @@
 "use client";
 
 import ContractDetails from "@/views/ContractDetails";
-import UniversalDApp from "@/views/UniversalDApp";
+import { UniversalDApp } from "@extrascan/shared/components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CodeDataType } from "@extrascan/shared/types";
 import { isSupportedNetwork } from "@extrascan/shared/configs";
@@ -68,8 +68,7 @@ export default function Home() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        networkId: Number(networkId),
-                        address: data.address,
+                        bytecode: data.bytecode,
                         apiKeys,
                         preferredProvider: localStorage.getItem("preferred_provider") || undefined,
                     }),
