@@ -14,7 +14,8 @@ export const getContractCreationInfo = async (
             retries
         );
         if (!transactionHash) throw new Error("Failed to fetch contract creation transaction");
-        const txn = await fetchTransactionByHashFromRPC(networkId, transactionHash, retries);
+        const txn = await fetchTransactionByHashFromRPC(networkId, transactionHash);
+        console.log("txn", txn);
         const blockNumber = parseInt(txn.result.blockNumber, 16);
         const deployer = txn.result.from;
         return { blockNumber, deployer };
@@ -67,39 +68,65 @@ export const fetchContractCreationHashWithRetry = async (url: string, retryCount
     }
 };
 
-export const fetchTransactionByHashFromRPC = async (
-    networkId: number,
-    transactionHash: string,
-    retries: number = 2
-): Promise<any> => {
-    let json: any;
-    for (let i = 0; i <= retries; i++) {
-        try {
-            const RPCURL = (await getRPCURLs(networkId))[0];
-            if (!RPCURL) throw new Error(`Unable to fetch RPC URL for network id ${networkId}`);
+async function tryFetchTransaction(rpcUrl: string, transactionHash: string): Promise<any> {
+    const result = await fetch(rpcUrl, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            jsonrpc: "2.0",
+            method: "eth_getTransactionByHash",
+            params: [transactionHash],
+            id: 1,
+        }),
+    });
 
-            const result = await fetch(RPCURL, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    jsonrpc: "2.0",
-                    method: "eth_getTransactionByHash",
-                    params: [transactionHash],
-                    id: 1,
-                }),
-            });
-            json = await result.json();
-
-            if (json.result) {
-                return json;
-            }
-        } catch (error) {
-            if (i === retries) {
-                console.debug("Failed to fetchTransactionByHashFromRPC after max retries: ", error);
-                throw new Error(`Failed to fetch contract creation transaction after ${retries} retries`);
-            }
-        }
+    if (!result?.ok) {
+        throw new Error(`HTTP error! status: ${result?.status}`);
     }
+
+    const data = await result.json();
+
+    if (data.error) {
+        throw new Error(`RPC error: ${data.error.message || JSON.stringify(data.error)}`);
+    }
+
+    if (!data?.result) {
+        throw new Error("Transaction not found");
+    }
+
+    return data;
+}
+
+export const fetchTransactionByHashFromRPC = async (networkId: number, transactionHash: string): Promise<any> => {
+    const rpcUrls = await getRPCURLs(networkId);
+    if (!rpcUrls.length) {
+        throw new Error(`Unable to get RPC URLs for network id ${networkId}`);
+    }
+
+    // Create promises for all RPC URLs
+    const promises = rpcUrls.map((rpcUrl) =>
+        tryFetchTransaction(rpcUrl, transactionHash).catch((error) => {
+            console.debug(`Failed to fetch transaction from ${rpcUrl}:`, error);
+            return Promise.reject(error);
+        })
+    );
+
+    // Try all URLs concurrently
+    const results = await Promise.allSettled(promises);
+
+    // Find the first successful result
+    const firstSuccess = results.find((result) => result?.status === "fulfilled");
+    if (firstSuccess && firstSuccess.status === "fulfilled") {
+        return firstSuccess.value;
+    }
+
+    // If all failed, collect error messages
+    const errors = results
+        .filter((result): result is PromiseRejectedResult => result?.status === "rejected")
+        .map((result) => result?.reason?.message || "Unknown error")
+        .join("; ");
+
+    throw new Error(`Failed to fetch transaction from all RPC URLs. Errors: ${errors}`);
 };
