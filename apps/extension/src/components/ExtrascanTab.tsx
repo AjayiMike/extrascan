@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { CodeDataType, ModelProvider } from "@extrascan/shared/types";
 import { getStoredApiKeys } from "../utils/storage";
+import { UniversalDApp } from "@extrascan/shared/components";
 
 export default function ExtrascanTab() {
     const [isExtrapolating, setIsExtrapolating] = useState(false);
@@ -64,7 +65,6 @@ export default function ExtrascanTab() {
                 });
 
                 const extrapolateData = await extrapolateResponse.json();
-                console.log("Extrapolated ABI Response:", extrapolateData);
 
                 if (!extrapolateData.ABI) {
                     throw new Error(
@@ -73,10 +73,9 @@ export default function ExtrascanTab() {
                 }
 
                 setContractData({ ...extrapolateData, networkId: 11155111 });
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error("Error:", error);
-                setError(error?.message ?? "Something went wrong");
+                setError(error instanceof Error ? error.message : "Something went wrong");
             } finally {
                 setIsExtrapolating(false);
             }
@@ -93,7 +92,7 @@ export default function ExtrascanTab() {
         <div className="p-4">
             <h2 className="text-xl font-bold mb-4">Extrascan</h2>
             {isExtrapolating && <div>Extrapolating ABI...</div>}
-            {contractData && <pre>{JSON.stringify(contractData, null, 2)}</pre>}
+            {contractData && <UniversalDApp data={contractData} />}
         </div>
     );
 }
