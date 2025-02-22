@@ -112,6 +112,8 @@ class ResilientRpcProvider extends JsonRpcProvider {
 export const useResilientJSONRPCProvider = (rpcUrls?: string[], networkId?: number, loggingEnabled = false) => {
     const [provider, setProvider] = useState<ResilientRpcProvider | null>(null);
 
+    console.log("rpcUrls", rpcUrls);
+
     useEffect(() => {
         if (!rpcUrls || !rpcUrls.length || !networkId) return setProvider(null);
         const resilientRpcProvider = new ResilientRpcProvider(rpcUrls, networkId, loggingEnabled);

@@ -1,24 +1,23 @@
 "use client";
-import { useContract } from "@extrascan/shared/hooks";
-import { escapeRegExp, numberInputRegex } from "@extrascan/shared/utils";
-import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import { Fragment, useCallback, useMemo, useState } from "react";
-import { DecodedError, ErrorDecoder } from "ethers-decode-error";
-import { Contract, JsonFragment } from "ethers";
-import { useErrorDecoder } from "@extrascan/shared/hooks";
-import { getFragmentConfidenceScore } from "@extrascan/shared/utils";
+import { useContract, useErrorDecoder } from "../../../hooks";
 import {
+    escapeRegExp,
+    numberInputRegex,
+    getFragmentConfidenceScore,
     getFieldLabel,
     getFunctionSignatureFromFragment,
     isReadMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "@extrascan/shared/utils";
-import { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "@extrascan/shared/types";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
+} from "../../../utils";
+import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
+import { Fragment, useCallback, useMemo, useState } from "react";
+import { Contract, type JsonFragment } from "ethers";
+import type { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "../../../types";
+import { useForm, FormProvider, type SubmitHandler } from "react-hook-form";
 import { Icon } from "@iconify/react";
-
-import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "@extrascan/shared/components";
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../../ContractFunctionComponents";
+import type { ErrorDecoder } from "ethers-decode-error";
 
 type Props = {
     networkId: number;
@@ -28,7 +27,13 @@ type Props = {
     startBlock?: number;
 };
 
-const ReadContractFunctions: React.FC<Props> = ({ address, ABI, networkId, ABIConfidenceScores, startBlock }) => {
+export const ReadContractFunctions: React.FC<Props> = ({
+    address,
+    ABI,
+    networkId,
+    ABIConfidenceScores,
+    startBlock,
+}) => {
     const [blockNumber, setBlockNumber] = useState<number | null>(null);
 
     const parsedABI = JSON.parse(ABI ?? "[]");
@@ -142,11 +147,13 @@ const ReadMethod: React.FC<{
 
                 const res = await callFunction(args, fragment);
 
+                console.log("res", res);
+
                 setResult({ result: res, error: null });
             } catch (error: unknown) {
                 console.debug("error: ", JSON.stringify(error, null, 2));
-                const decodedError: DecodedError = await errorDecoder.decode(error);
-                setResult({ result: null, error: decodedError.reason || "Unknow error" });
+                const decodedError = await errorDecoder.decode(error);
+                setResult({ result: null, error: decodedError.reason || "Unknown error" });
             } finally {
                 setIsLoading(false);
             }
@@ -248,10 +255,16 @@ const ReadMethod: React.FC<{
 
                             {isLoading ? (
                                 <p className="p-2">fetching...</p>
-                            ) : result && result.result !== null ? (
-                                <p className="p-2">{String(result?.result)}</p>
-                            ) : result?.error ? (
-                                <p className="p-2 text-red-600">{result.error}</p>
+                            ) : result ? (
+                                <div className="mt-4 p-2 bg-gray-100 rounded-md">
+                                    {result.error ? (
+                                        <p className="text-red-500">{result.error}</p>
+                                    ) : (
+                                        <pre className="whitespace-pre-wrap break-words">
+                                            {JSON.stringify(result.result?.toString(), null, 2)}
+                                        </pre>
+                                    )}
+                                </div>
                             ) : null}
                         </form>
                     </FormProvider>
@@ -260,5 +273,3 @@ const ReadMethod: React.FC<{
         </Disclosure>
     );
 };
-
-export default ReadContractFunctions;

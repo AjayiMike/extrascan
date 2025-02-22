@@ -1,21 +1,29 @@
 import { useEffect, useState } from "react";
 import { CodeDataType, ModelProvider } from "@extrascan/shared/types";
 import { getStoredApiKeys } from "../utils/storage";
+import { UniversalDApp } from "@extrascan/shared/components";
+import { useInitAppkit } from "@extrascan/shared/hooks";
 
 export default function ExtrascanTab() {
     const [isExtrapolating, setIsExtrapolating] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [contractData, setContractData] = useState<CodeDataType | null>(null);
 
+    useInitAppkit("b00380ad71d94178d6d61e8c6fc19bc0");
+
     useEffect(() => {
         const fetchData = async () => {
             try {
+                console.log("get here!!! ");
+                console.log("window.location.pathname: ", window.location.pathname);
                 const address = window.location.pathname.split("/")[2];
+                console.log("address: ", address);
                 const codeElement = document.querySelector("#dividcode .wordwrap.scrollbar-custom");
+                console.log("codeElement: ", codeElement);
                 if (!codeElement) return;
 
                 const bytecode = codeElement.innerHTML.trim();
-
+                console.log("bytecode: ", bytecode);
                 // First check if contract is verified
                 const response = await fetch("https://www.extrascan.xyz/api/code", {
                     method: "POST",
@@ -24,9 +32,11 @@ export default function ExtrascanTab() {
                     },
                     body: JSON.stringify({
                         networkId: 11155111, // Sepolia network ID
-                        address,
+                        address: "0xD3a3F07E7Cdcf62F69034EB7845F099796eC6D1E",
                     }),
                 });
+
+                console.log("response: ", response);
 
                 const data = await response.json();
 
@@ -64,7 +74,8 @@ export default function ExtrascanTab() {
                 });
 
                 const extrapolateData = await extrapolateResponse.json();
-                console.log("Extrapolated ABI Response:", extrapolateData);
+
+                console.log(extrapolateData);
 
                 if (!extrapolateData.ABI) {
                     throw new Error(
@@ -73,10 +84,9 @@ export default function ExtrascanTab() {
                 }
 
                 setContractData({ ...extrapolateData, networkId: 11155111 });
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } catch (error: any) {
+            } catch (error: unknown) {
                 console.error("Error:", error);
-                setError(error?.message ?? "Something went wrong");
+                setError(error instanceof Error ? error.message : "Something went wrong");
             } finally {
                 setIsExtrapolating(false);
             }
@@ -93,7 +103,7 @@ export default function ExtrascanTab() {
         <div className="p-4">
             <h2 className="text-xl font-bold mb-4">Extrascan</h2>
             {isExtrapolating && <div>Extrapolating ABI...</div>}
-            {contractData && <pre>{JSON.stringify(contractData, null, 2)}</pre>}
+            {contractData && <UniversalDApp data={contractData} />}
         </div>
     );
 }

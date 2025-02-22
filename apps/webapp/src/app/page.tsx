@@ -1,7 +1,7 @@
 "use client";
 
-import ContractDetails from "@/views/ContractDetails";
-import UniversalDApp from "@/views/UniversalDApp";
+import ContractDetails from "@/components/ContractDetails";
+import { UniversalDApp } from "@extrascan/shared/components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CodeDataType } from "@extrascan/shared/types";
 import { isSupportedNetwork } from "@extrascan/shared/configs";
@@ -48,6 +48,11 @@ export default function Home() {
                     return;
                 }
 
+                if (!data.bytecode) {
+                    setError("Could not fetch contract bytecode. Please provide a valid contract address.");
+                    return;
+                }
+
                 const apiKeys = getStoredApiKeys();
                 const hasValidApiKey = Object.values(ModelProvider).some((provider) => apiKeys[provider]);
 
@@ -68,8 +73,7 @@ export default function Home() {
                         "Content-Type": "application/json",
                     },
                     body: JSON.stringify({
-                        networkId: Number(networkId),
-                        address: data.address,
+                        bytecode: data.bytecode,
                         apiKeys,
                         preferredProvider: localStorage.getItem("preferred_provider") || undefined,
                     }),
@@ -81,7 +85,7 @@ export default function Home() {
                     throw new Error(
                         extrapolateABIdata.error || `unable to extrapolate ABI for unverified contract: ${address}`
                     );
-                setContractData({ ...extrapolateABIdata, networkId: Number(networkId) });
+                setContractData({ ...extrapolateABIdata, address, networkId: Number(networkId) });
             } catch (error: any) {
                 if (error.name === "AbortError") {
                     console.debug("Fetch request was canceled");

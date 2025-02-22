@@ -1,9 +1,10 @@
 import { defineConfig } from "vite";
 import { resolve } from "path";
 import react from "@vitejs/plugin-react";
+import nodePolyfills from "vite-plugin-node-stdlib-browser";
 
 export default defineConfig({
-    plugins: [react()],
+    plugins: [react(), nodePolyfills()],
     build: {
         outDir: "dist",
         lib: {

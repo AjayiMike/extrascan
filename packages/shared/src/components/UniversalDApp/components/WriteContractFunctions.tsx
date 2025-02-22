@@ -1,27 +1,24 @@
 "use client";
 
-import { useContract } from "@extrascan/shared/hooks";
-import { useErrorDecoder } from "@extrascan/shared/hooks";
-import { useNetworkDataForChainId } from "@extrascan/shared/hooks";
-import { getFragmentConfidenceScore } from "@extrascan/shared/utils";
+import { useContract, useErrorDecoder, useNetworkDataForChainId } from "../../../hooks";
 import {
+    getFragmentConfidenceScore,
     getFieldLabel,
     getFunctionSignatureFromFragment,
     isWriteMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "@extrascan/shared/utils";
+} from "../../../utils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
 import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
-import { Contract } from "ethers";
-import { JsonFragment } from "ethers";
-import { DecodedError, ErrorDecoder } from "ethers-decode-error";
+import type { Contract, JsonFragment } from "ethers";
+import type { DecodedError, ErrorDecoder } from "ethers-decode-error";
 import { Fragment, useCallback, useState } from "react";
-import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { ContractMethodFormFields, ContractMethodResult } from "@extrascan/shared/types";
+import { useForm, FormProvider } from "react-hook-form";
+import type { SubmitHandler } from "react-hook-form";
+import type { ContractMethodFormFields, ContractMethodResult } from "../../../types";
 import { Icon } from "@iconify/react";
-
-import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "@extrascan/shared/components";
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../../ContractFunctionComponents";
 
 type Props = {
     networkId: number;
@@ -29,7 +26,8 @@ type Props = {
     ABI?: string;
     ABIConfidenceScores?: { [key: string]: number };
 };
-const WriteContractFunctions: React.FC<Props> = ({ networkId, address, ABI, ABIConfidenceScores }) => {
+
+export const WriteContractFunctions: React.FC<Props> = ({ networkId, address, ABI, ABIConfidenceScores }) => {
     const parsedABI = JSON.parse(ABI ?? "[]");
     const writeOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(isWriteMethod);
     const networkData = useNetworkDataForChainId(networkId);
@@ -47,7 +45,7 @@ const WriteContractFunctions: React.FC<Props> = ({ networkId, address, ABI, ABIC
                 <h2 className="text-xl font-semibold">Contract Write Functions</h2>
                 <span className="text-orange-700 text-sm">
                     {!account
-                        ? "Connecte wallet to write"
+                        ? "Connect wallet to write"
                         : isOnWrongNetwork && networkData && `Switch to ${networkData?.name}`}
                 </span>
             </div>
@@ -122,7 +120,7 @@ const WriteMethod: React.FC<{
             } catch (error: unknown) {
                 console.debug("error: ", JSON.stringify(error, null, 2));
                 const decodedError: DecodedError = await errorDecoder.decode(error);
-                setResult({ result: null, error: decodedError.reason || "Unknow error" });
+                setResult({ result: null, error: decodedError.reason || "Unknown error" });
             } finally {
                 setIsLoading(false);
             }
@@ -133,9 +131,10 @@ const WriteMethod: React.FC<{
     const handleFormChange = useCallback(() => {
         result && setResult(undefined);
     }, [result]);
-    const { chainId } = useAppKitNetwork();
 
+    const { chainId } = useAppKitNetwork();
     const networkData = useNetworkDataForChainId(chainId ? Number(chainId) : undefined);
+
     const getTransactionLink = (txHash: string) => {
         if (networkData && networkData.explorers[0].url) {
             return `${networkData.explorers[0].url}/tx/${txHash}`;
@@ -228,5 +227,3 @@ const WriteMethod: React.FC<{
         </Disclosure>
     );
 };
-
-export default WriteContractFunctions;

@@ -47,7 +47,6 @@ export async function POST(request: Request) {
             );
         }
 
-        // Either bytecode or (networkId + address) must be provided
         if (!bytecode && (!networkId || !address)) {
             return Response.json(
                 {

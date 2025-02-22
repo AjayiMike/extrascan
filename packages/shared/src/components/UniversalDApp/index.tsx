@@ -1,21 +1,28 @@
 "use client";
-import { shortenAddress } from "@extrascan/shared/utils";
+import { shortenAddress } from "../../utils";
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import ReadContractFunctions from "./components/ReadContractFunctions";
-import WriteContractFunctions from "./components/WriteContractFunctions";
-import ABIComponent from "./components/ABI";
-import { CodeDataType } from "@extrascan/shared/types";
+import { ReadContractFunctions } from "./components/ReadContractFunctions";
+import { WriteContractFunctions } from "./components/WriteContractFunctions";
+import { ABIComponent } from "./components/ABI";
+import type { CodeDataType } from "../../types";
 import { Icon } from "@iconify/react";
+
+export { ReadContractFunctions } from "./components/ReadContractFunctions";
+export { WriteContractFunctions } from "./components/WriteContractFunctions";
+export { ABIComponent } from "./components/ABI";
 
 type Props = {
     data: CodeDataType;
 };
+
 const UniversalDApp: React.FC<Props> = ({
     data: {
         ABI,
         ABIConfidenceScores,
         address,
+        isProxy,
+        implementationAddress,
         networkId,
         contractName,
         bytecode,
@@ -27,7 +34,19 @@ const UniversalDApp: React.FC<Props> = ({
 }) => {
     return (
         <div className="w-full">
+            {isProxy && (
+                <div className="mb-4 bg-cyan-800 bg-opacity-20 p-4 rounded-md flex gap-2 items-center">
+                    <Icon icon="lets-icons:info-duotone" className="h-5 w-5 text-cyan-800" />
+                    <p className="text-sm">
+                        This is a proxy contract. The implementation address is at {implementationAddress}.
+                    </p>
+                </div>
+            )}
             <div className="flex gap-x-8 gap-y-2 flex-wrap">
+                <div className="flex gap-4">
+                    <span>Name:</span>
+                    <span className="text-cyan-800">{contractName ?? "Unknown"}</span>
+                </div>
                 <div className="flex gap-4">
                     <span>Name:</span>
                     <span className="text-cyan-800">{contractName ?? "Unknown"}</span>
@@ -60,7 +79,7 @@ const UniversalDApp: React.FC<Props> = ({
             {!isVerified && (
                 <p className="mt-4 text-sm text-gray-500">
                     The ABI of this smart contract was extrapolated from the bytecode, as such, some functions may not
-                    be present or accurately represented. Associated with each function is a confidence score (from 0 -
+                    be present or accurately extrapolated. Associated with each function is a confidence score (from 0 -
                     1), which indicates the likelihood of the function being accurate.
                 </p>
             )}
