@@ -21,6 +21,8 @@ const UniversalDApp: React.FC<Props> = ({
         ABI,
         ABIConfidenceScores,
         address,
+        isProxy,
+        implementationAddress,
         networkId,
         contractName,
         bytecode,
@@ -32,7 +34,19 @@ const UniversalDApp: React.FC<Props> = ({
 }) => {
     return (
         <div className="w-full">
+            {isProxy && (
+                <div className="mb-4 bg-cyan-800 bg-opacity-20 p-4 rounded-md flex gap-2 items-center">
+                    <Icon icon="lets-icons:info-duotone" className="h-5 w-5 text-cyan-800" />
+                    <p className="text-sm">
+                        This is a proxy contract. The implementation address is at {implementationAddress}.
+                    </p>
+                </div>
+            )}
             <div className="flex gap-x-8 gap-y-2 flex-wrap">
+                <div className="flex gap-4">
+                    <span>Name:</span>
+                    <span className="text-cyan-800">{contractName ?? "Unknown"}</span>
+                </div>
                 <div className="flex gap-4">
                     <span>Name:</span>
                     <span className="text-cyan-800">{contractName ?? "Unknown"}</span>

@@ -5,6 +5,7 @@ export const loadCodeFromEtherscan = async (
     etherscanApiKey: string,
     networkId: number,
     address: string,
+    proxyAddress?: string,
     retries = 2
 ): Promise<Result<CodeDataType>> => {
     try {
@@ -22,7 +23,7 @@ export const loadCodeFromEtherscan = async (
         if (data.status === "0") {
             if (retries > 0) {
                 // Retry the request
-                return loadCodeFromEtherscan(etherscanApiKey, networkId, address, retries - 1);
+                return loadCodeFromEtherscan(etherscanApiKey, networkId, address, proxyAddress, retries - 1);
             } else {
                 return {
                     error: {
@@ -32,14 +33,15 @@ export const loadCodeFromEtherscan = async (
             }
         }
 
-        const contractCodeData = data.result[0];
+        console.log({ address, proxyAddress });
 
+        const contractCodeData = data.result[0];
         // if it is the implementation || it claims to be a proxy, but the implementation address is same as the proxy address
         if (contractCodeData.Proxy === "0" || contractCodeData.Implementation === address) {
             const isVerified = contractCodeData.ABI !== "Contract source code not verified";
             return {
                 data: {
-                    address,
+                    address: proxyAddress || address,
                     networkId,
                     isVerified,
                     contractName: contractCodeData.ContractName || null,
@@ -48,16 +50,19 @@ export const loadCodeFromEtherscan = async (
                     compilerVersion: contractCodeData.CompilerVersion || null,
                     optimizationUsed: contractCodeData.OptimizationUsed || null,
                     runs: contractCodeData.Runs || null,
+                    isProxy: !!proxyAddress,
+                    implementationAddress: !!proxyAddress ? address : undefined,
                 },
             };
         }
         // it is the proxy, go to implementation
-        return loadCodeFromEtherscan(etherscanApiKey, networkId, contractCodeData.Implementation);
+        const _proxyAddress = address;
+        return loadCodeFromEtherscan(etherscanApiKey, networkId, contractCodeData.Implementation, _proxyAddress);
     } catch (error) {
         console.log(error);
         if (retries > 0) {
             // Retry the request
-            return loadCodeFromEtherscan(etherscanApiKey, networkId, address, retries - 1);
+            return loadCodeFromEtherscan(etherscanApiKey, networkId, address, proxyAddress, retries - 1);
         } else {
             return {
                 error: {

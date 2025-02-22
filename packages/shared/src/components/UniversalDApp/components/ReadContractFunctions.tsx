@@ -147,6 +147,8 @@ const ReadMethod: React.FC<{
 
                 const res = await callFunction(args, fragment);
 
+                console.log("res", res);
+
                 setResult({ result: res, error: null });
             } catch (error: unknown) {
                 console.debug("error: ", JSON.stringify(error, null, 2));
@@ -259,7 +261,7 @@ const ReadMethod: React.FC<{
                                         <p className="text-red-500">{result.error}</p>
                                     ) : (
                                         <pre className="whitespace-pre-wrap break-words">
-                                            {JSON.stringify(result.result, null, 2)}
+                                            {JSON.stringify(result.result?.toString(), null, 2)}
                                         </pre>
                                     )}
                                 </div>

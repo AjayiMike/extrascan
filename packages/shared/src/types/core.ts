@@ -12,4 +12,6 @@ export type CodeDataType = {
     compilerVersion?: string;
     optimizationUsed?: string;
     runs?: string;
+    isProxy?: boolean;
+    implementationAddress?: string;
 };

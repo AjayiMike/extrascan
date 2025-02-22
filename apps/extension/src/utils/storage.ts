@@ -1,7 +1,9 @@
 import { ModelProvider, ModelApiKeys } from "@extrascan/shared/types";
 
 export async function getStoredApiKeys(): Promise<ModelApiKeys> {
+    console.log("getStoredApiKeys: ");
     const result = await chrome.storage.sync.get("apiKeys");
+    console.log("result: ", JSON.stringify(result));
     return result.apiKeys || {};
 }
 
