@@ -1,4 +1,3 @@
-"use client";
 import { useContract, useErrorDecoder } from "../../../hooks";
 import {
     escapeRegExp,

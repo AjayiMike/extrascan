@@ -1,5 +1,3 @@
-"use client";
-
 import { Field, Select } from "@headlessui/react";
 import { Icon } from "@iconify/react";
 import clsx from "clsx";

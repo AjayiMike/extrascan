@@ -1,4 +1,3 @@
-"use client";
 import { getNetworkIcon, getNetworkName } from "@/configs/network";
 import { useSupportedNetworkData } from "@/hooks/useSupportedNetworkData";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";

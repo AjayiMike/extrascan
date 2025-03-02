@@ -1,4 +1,3 @@
-"use client";
 import { shortenAddress } from "../../utils";
 import React from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";

@@ -1,5 +1,3 @@
-"use client";
-
 import { useContract, useErrorDecoder, useNetworkDataForChainId } from "../../../hooks";
 import {
     getFragmentConfidenceScore,
