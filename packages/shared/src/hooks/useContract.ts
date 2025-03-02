@@ -17,7 +17,6 @@ export function useContract<T extends Contract = Contract>(
     const provider = useProvider(walletProvider);
     const signer = useSigner(provider, account);
     const networkData = useSupportedNetworkData();
-    console.log("networkData", networkData);
     const rpcUrls = useMemo(
         () => networkData.find((network) => network.chainId === networkId)?.rpcUrls,
         [networkData, networkId]
@@ -30,7 +29,7 @@ export function useContract<T extends Contract = Contract>(
             const contract = new Contract(
                 address,
                 ABI,
-                withSignerIfPossible ? (signer ?? resilientRpcProvider) : resilientRpcProvider
+                withSignerIfPossible ? signer ?? resilientRpcProvider : resilientRpcProvider
             );
             return contract as T;
         } catch (error) {
