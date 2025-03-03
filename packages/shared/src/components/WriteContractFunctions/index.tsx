@@ -1,4 +1,4 @@
-import { useContract, useErrorDecoder, useNetworkDataForChainId } from "../../../hooks";
+import { useContract, useErrorDecoder, useNetworkDataForChainId } from "../../hooks";
 import {
     getFragmentConfidenceScore,
     getFieldLabel,
@@ -6,43 +6,51 @@ import {
     isWriteMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "../../../utils";
+} from "../../utils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
 import type { Contract, JsonFragment } from "ethers";
 import type { DecodedError, ErrorDecoder } from "ethers-decode-error";
-import { Fragment, useCallback, useState } from "react";
+import { Fragment, useCallback, useState, type FC } from "react";
 import { useForm, FormProvider } from "react-hook-form";
 import type { SubmitHandler } from "react-hook-form";
-import type { ContractMethodFormFields, ContractMethodResult } from "../../../types";
+import type { ContractMethodFormFields, ContractMethodResult } from "../../types";
 import { Icon } from "@iconify/react";
-import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../../ContractFunctionComponents";
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../ContractFunctionComponents";
 
-type Props = {
+type WriteContractFunctionsProps = {
+    walletProvider?: any;
+    userAddress?: string;
+    connetedChainId: string | number | undefined;
     networkId: number;
     address: string | null;
     ABI?: string;
     ABIConfidenceScores?: { [key: string]: number };
 };
 
-export const WriteContractFunctions: React.FC<Props> = ({ networkId, address, ABI, ABIConfidenceScores }) => {
+export const WriteContractFunctions: FC<WriteContractFunctionsProps> = ({
+    walletProvider,
+    userAddress,
+    connetedChainId,
+    networkId,
+    address,
+    ABI,
+    ABIConfidenceScores,
+}) => {
     const parsedABI = JSON.parse(ABI ?? "[]");
     const writeOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(isWriteMethod);
     const networkData = useNetworkDataForChainId(networkId);
-    const { chainId } = useAppKitNetwork();
-    const { address: account } = useAppKitAccount();
 
-    const contractInstance = useContract(address as string, parsedABI, networkId);
+    const contractInstance = useContract(address as string, parsedABI, networkId, walletProvider, userAddress);
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
 
-    const isOnWrongNetwork = chainId !== networkId;
+    const isOnWrongNetwork = connetedChainId !== networkId;
 
     return (
         <div className="w-full mt-6">
             <div className="flex flex-col md:flex-row md:gap-4 md:items-center">
                 <h2 className="text-xl font-semibold">Contract Write Functions</h2>
                 <span className="text-orange-700 text-sm">
-                    {!account
+                    {!userAddress
                         ? "Connect wallet to write"
                         : isOnWrongNetwork && networkData && `Switch to ${networkData?.name}`}
                 </span>
@@ -53,6 +61,8 @@ export const WriteContractFunctions: React.FC<Props> = ({ networkId, address, AB
                     return (
                         <WriteMethod
                             key={`${func.name}-${index}`}
+                            userAddress={userAddress}
+                            connetedChainId={connetedChainId}
                             fragment={func}
                             contractInstance={contractInstance}
                             errorDecoder={errorDecoder}
@@ -67,18 +77,18 @@ export const WriteContractFunctions: React.FC<Props> = ({ networkId, address, AB
 };
 
 const WriteMethod: React.FC<{
+    userAddress?: string;
+    connetedChainId: string | number | undefined;
     fragment: JsonFragment;
     confidenceScores?: number;
     contractInstance: Contract | null;
     errorDecoder: ErrorDecoder;
     disable: boolean;
-}> = ({ fragment, contractInstance, errorDecoder, confidenceScores, disable }) => {
+}> = ({ fragment, contractInstance, errorDecoder, confidenceScores, disable, userAddress, connetedChainId }) => {
     const name = fragment.name;
     const inputs = fragment.inputs || [];
     const [result, setResult] = useState<ContractMethodResult>();
     const [isLoading, setIsLoading] = useState(false);
-
-    const { address } = useAppKitAccount();
 
     const formApi = useForm<ContractMethodFormFields>({
         mode: "all",
@@ -107,7 +117,7 @@ const WriteMethod: React.FC<{
     const onFormSubmit: SubmitHandler<ContractMethodFormFields> = useCallback(
         async (formData) => {
             try {
-                if (!address) return setResult({ result: null, error: "Kindly connect a wallet to write" });
+                if (!userAddress) return setResult({ result: null, error: "Kindly connect a wallet to write" });
                 const args = transformFormDataToMethodArgs(formData);
                 setResult(undefined);
                 setIsLoading(true);
@@ -123,15 +133,14 @@ const WriteMethod: React.FC<{
                 setIsLoading(false);
             }
         },
-        [address, callFunction, errorDecoder, fragment]
+        [userAddress, callFunction, errorDecoder, fragment]
     );
 
     const handleFormChange = useCallback(() => {
         result && setResult(undefined);
     }, [result]);
 
-    const { chainId } = useAppKitNetwork();
-    const networkData = useNetworkDataForChainId(chainId ? Number(chainId) : undefined);
+    const networkData = useNetworkDataForChainId(connetedChainId ? Number(connetedChainId) : undefined);
 
     const getTransactionLink = (txHash: string) => {
         if (networkData && networkData.explorers[0].url) {
@@ -170,7 +179,7 @@ const WriteMethod: React.FC<{
                                 const arrayMatch = matchArray(input.type as string);
 
                                 if ("components" in input && input.components && input.type === "tuple") {
-                                    return <TupleInputField key={i} {...props} />;
+                                    return <TupleInputField key={i} userAddress={userAddress} {...props} />;
                                 }
 
                                 if (arrayMatch) {
@@ -184,14 +193,14 @@ const WriteMethod: React.FC<{
                                                 label={getFieldLabel(input)}
                                                 isInvalid={isInvalid}
                                             >
-                                                <ArrayInputField {...props} />
+                                                <ArrayInputField userAddress={userAddress} {...props} />
                                             </FieldAccordion>
                                         );
                                     }
-                                    return <ArrayInputField key={i} {...props} />;
+                                    return <ArrayInputField key={i} userAddress={userAddress} {...props} />;
                                 }
 
-                                return <SimpleInputField key={i} {...props} path={`${i}`} />;
+                                return <SimpleInputField key={i} userAddress={userAddress} {...props} path={`${i}`} />;
                             })}
                             <div>
                                 <button

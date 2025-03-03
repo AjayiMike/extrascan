@@ -1,7 +1,7 @@
 import type { AppKitNetwork } from "@reown/appkit/networks";
 import * as chains from "viem/chains";
-import { useSupportedNetworkData } from "./useSupportedNetworkData";
-import type { NetworkDataType } from "@/types/chain";
+import { useSupportedNetworkData } from "@extrascan/shared/hooks";
+import type { NetworkDataType } from "@extrascan/shared/types";
 import { extractChain, defineChain } from "viem/utils";
 import { useEffect, useMemo } from "react";
 import { EthersAdapter } from "@reown/appkit-adapter-ethers";
@@ -11,7 +11,6 @@ const allChains = Object.values(chains);
 
 const getOrDefineAppkitNetwork = (networkData: NetworkDataType): AppKitNetwork | undefined => {
     try {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const extracted = extractChain({ chains: allChains, id: networkData.chainId as any });
         if (extracted) return extracted;
 

@@ -8,12 +8,12 @@ import { nord } from "react-syntax-highlighter/dist/esm/styles/prism";
 import { toast } from "react-toastify";
 import { useCopyToClipboard } from "usehooks-ts";
 
-type ABIFormatOption = {
+export type ABIFormatOption = {
     value: "json" | "human readable" | "minimal human readable";
     label: string;
 };
 
-type Props = {
+type ABIComponentProps = {
     isExtrapolated: boolean;
     sourceCode?: string;
     bytecode?: string;
@@ -21,7 +21,7 @@ type Props = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const ABIComponent: FC<Props> = ({ ABI, bytecode, sourceCode, isExtrapolated }) => {
+export const ABIComponent: FC<ABIComponentProps> = ({ ABI, bytecode, sourceCode, isExtrapolated }) => {
     const [formartedABI, setFormartedABI] = useState<Array<string> | string>(
         JSON.stringify(JSON.parse(ABI as string), null, 2)
     );

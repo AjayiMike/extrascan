@@ -1,4 +1,4 @@
-import { useContract, useErrorDecoder } from "../../../hooks";
+import { useContract, useErrorDecoder } from "../../hooks";
 import {
     escapeRegExp,
     numberInputRegex,
@@ -8,17 +8,19 @@ import {
     isReadMethod,
     matchArray,
     transformFormDataToMethodArgs,
-} from "../../../utils";
+} from "../../utils";
 import { Disclosure, DisclosureButton, DisclosurePanel } from "@headlessui/react";
-import { Fragment, useCallback, useMemo, useState } from "react";
+import { Fragment, useCallback, useMemo, useState, type FC } from "react";
 import { Contract, type JsonFragment } from "ethers";
-import type { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "../../../types";
+import type { ContractAbiItemInput, ContractMethodFormFields, ContractMethodResult } from "../../types";
 import { useForm, FormProvider, type SubmitHandler } from "react-hook-form";
 import { Icon } from "@iconify/react";
-import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../../ContractFunctionComponents";
+import { SimpleInputField, FieldAccordion, ArrayInputField, TupleInputField } from "../ContractFunctionComponents";
 import type { ErrorDecoder } from "ethers-decode-error";
 
-type Props = {
+type ReadContractFunctionsProps = {
+    walletProvider?: any;
+    userAddress?: string;
     networkId: number;
     address: string | null;
     ABI?: string;
@@ -26,8 +28,9 @@ type Props = {
     startBlock?: number;
 };
 
-export const ReadContractFunctions: React.FC<Props> = ({
+export const ReadContractFunctions: FC<ReadContractFunctionsProps> = ({
     address,
+    userAddress,
     ABI,
     networkId,
     ABIConfidenceScores,
@@ -39,7 +42,7 @@ export const ReadContractFunctions: React.FC<Props> = ({
 
     const readOnlyFunctionFragments: ReadonlyArray<JsonFragment> = parsedABI.filter(isReadMethod);
 
-    const contractInstance = useContract(address as string, parsedABI, networkId, false);
+    const contractInstance = useContract(address as string, parsedABI, networkId, undefined, userAddress, false);
 
     const errorDecoder = useErrorDecoder(contractInstance?.interface);
 
@@ -72,6 +75,7 @@ export const ReadContractFunctions: React.FC<Props> = ({
                     return (
                         <ReadMethod
                             key={`${func.name}-${index}`}
+                            userAddress={userAddress}
                             fragment={func}
                             contractInstance={contractInstance}
                             blockNumber={blockNumber}
@@ -86,12 +90,13 @@ export const ReadContractFunctions: React.FC<Props> = ({
 };
 
 const ReadMethod: React.FC<{
+    userAddress?: string;
     fragment: JsonFragment;
     contractInstance: Contract | null;
     confidenceScores?: number;
     blockNumber: number | null;
     errorDecoder: ErrorDecoder;
-}> = ({ fragment, contractInstance, confidenceScores, blockNumber, errorDecoder }) => {
+}> = ({ fragment, contractInstance, confidenceScores, blockNumber, errorDecoder, userAddress }) => {
     const name = fragment.name;
     const inputs: ContractAbiItemInput[] | undefined = useMemo(() => {
         return [
@@ -145,8 +150,6 @@ const ReadMethod: React.FC<{
                 setIsLoading(true);
 
                 const res = await callFunction(args, fragment);
-
-                console.log("res", res);
 
                 setResult({ result: res, error: null });
             } catch (error: unknown) {
@@ -234,14 +237,14 @@ const ReadMethod: React.FC<{
                                                 label={getFieldLabel(input)}
                                                 isInvalid={isInvalid}
                                             >
-                                                <ArrayInputField {...props} />
+                                                <ArrayInputField userAddress={userAddress} {...props} />
                                             </FieldAccordion>
                                         );
                                     }
-                                    return <ArrayInputField key={i} {...props} />;
+                                    return <ArrayInputField key={i} userAddress={userAddress} {...props} />;
                                 }
 
-                                return <SimpleInputField key={i} {...props} path={`${i}`} />;
+                                return <SimpleInputField key={i} userAddress={userAddress} {...props} path={`${i}`} />;
                             })}
                             {!hasConstantOutputs && (
                                 <button

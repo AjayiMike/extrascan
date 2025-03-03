@@ -1,21 +1,17 @@
-import { shortenAddress } from "../../utils";
-import React from "react";
+import { shortenAddress } from "@extrascan/shared/utils";
+import React, { type FC } from "react";
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
-import { ReadContractFunctions } from "./components/ReadContractFunctions";
-import { WriteContractFunctions } from "./components/WriteContractFunctions";
-import { ABIComponent } from "./components/ABI";
-import type { CodeDataType } from "../../types";
+import { ReadContractFunctions, WriteContractFunctions, ABIComponent } from "@extrascan/shared/components";
+import type { CodeDataType } from "@extrascan/shared/types";
 import { Icon } from "@iconify/react";
+import { useAppKitAccount, useAppKitNetwork } from "@reown/appkit/react";
+import { useAppKitProvider } from "@reown/appkit/react";
 
-export { ReadContractFunctions } from "./components/ReadContractFunctions";
-export { WriteContractFunctions } from "./components/WriteContractFunctions";
-export { ABIComponent } from "./components/ABI";
-
-type Props = {
+type UniversalDAppProps = {
     data: CodeDataType;
 };
 
-const UniversalDApp: React.FC<Props> = ({
+export const UniversalDApp = ({
     data: {
         ABI,
         ABIConfidenceScores,
@@ -30,7 +26,10 @@ const UniversalDApp: React.FC<Props> = ({
         startBlock,
         deployer,
     },
-}) => {
+}: UniversalDAppProps) => {
+    const { address: account } = useAppKitAccount();
+    const { walletProvider } = useAppKitProvider<any>("eip155");
+    const { chainId } = useAppKitNetwork();
     return (
         <div className="w-full">
             {isProxy && (
@@ -97,6 +96,8 @@ const UniversalDApp: React.FC<Props> = ({
                 <TabPanels>
                     <TabPanel>
                         <ReadContractFunctions
+                            walletProvider={walletProvider}
+                            userAddress={account}
                             networkId={networkId}
                             address={address}
                             ABI={ABI}
@@ -106,6 +107,9 @@ const UniversalDApp: React.FC<Props> = ({
                     </TabPanel>
                     <TabPanel>
                         <WriteContractFunctions
+                            walletProvider={walletProvider}
+                            userAddress={account}
+                            connetedChainId={chainId}
                             networkId={networkId}
                             address={address}
                             ABI={ABI}

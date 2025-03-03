@@ -25,7 +25,8 @@
         "react-hook-form": "^7.53.2",
         "react-syntax-highlighter": "^15.6.1",
         "react-toastify": "^10.0.5",
-        "usehooks-ts": "^3.1.0"
+        "usehooks-ts": "^3.1.0",
+        "viem": "^2.21.57"
     },
     "devDependencies": {
         "@types/node": "^20",
