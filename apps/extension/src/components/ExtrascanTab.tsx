@@ -1,15 +1,12 @@
 import { useEffect, useState } from "react";
 import { CodeDataType, ModelProvider } from "@extrascan/shared/types";
 import { getStoredApiKeys } from "../utils/storage";
-import { UniversalDApp } from "@extrascan/shared/components";
-import { useInitAppkit } from "@extrascan/shared/hooks";
 
 export default function ExtrascanTab() {
     const [isExtrapolating, setIsExtrapolating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [contractData, setContractData] = useState<CodeDataType | null>(null);
-
-    useInitAppkit("b00380ad71d94178d6d61e8c6fc19bc0");
 
     useEffect(() => {
         const fetchData = async () => {
@@ -103,7 +100,6 @@ export default function ExtrascanTab() {
         <div className="p-4">
             <h2 className="text-xl font-bold mb-4">Extrascan</h2>
             {isExtrapolating && <div>Extrapolating ABI...</div>}
-            {contractData && <UniversalDApp data={contractData} />}
         </div>
     );
 }
