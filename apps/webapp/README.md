@@ -4,19 +4,19 @@ Extrascan enables interaction with Ethereum smart contracts, whether they are ve
 
 ## Features
 
--   Smart contract ABI extraction and interaction
--   Support for unverified contracts through AI-powered ABI extrapolation
--   Multi-network support for Ethereum and compatible chains
--   Interactive contract function calling (read/write)
--   Confidence scores for extrapolated functions
--   Secure API key management
--   Web3 wallet integration
+- Smart contract ABI extraction and interaction
+- Support for unverified contracts through AI-powered ABI extrapolation
+- Multi-network support for Ethereum and compatible chains
+- Interactive contract function calling (read/write)
+- Confidence scores for extrapolated functions
+- Secure API key management
+- Web3 wallet integration
 
 ## Prerequisites
 
--   Node.js >= 20.12.2
--   Yarn >= 1.22.19
--   Redis server (for caching)
+- Node.js >= 20.12.2
+- Yarn >= 1.22.19
+- Redis server (for caching)
 
 ## Installation
 
@@ -54,12 +54,12 @@ Extrascan enables interaction with Ethereum smart contracts, whether they are ve
 
 Currently supported:
 
--   Google Gemini Pro
+- Google Gemini Pro
 
 Coming soon:
 
--   OpenAI GPT-4
--   Anthropic Claude
+- OpenAI GPT-4
+- Anthropic Claude
 
 To use the AI features, you'll need to obtain an API key from Google's AI Studio and add it through the application's API key settings in the app.
 
@@ -93,8 +93,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
--   [WhatsABI](https://github.com/shazow/whatsabi) for bytecode analysis
--   [openchain](https://openchain.xyz) for function signature lookup
--   [Ethers.js](https://docs.ethers.org/v6/) for Ethereum interaction
--   [chainid.network](https://chainid.network) for rich network data and RPC URL
--   [@reown/appkit](https://reown.com/appkit) for wallet connection
+- [WhatsABI](https://github.com/shazow/whatsabi) for bytecode analysis
+- [openchain](https://openchain.xyz) for function signature lookup
+- [Ethers.js](https://docs.ethers.org/v6/) for Ethereum interaction
+- [chainid.network](https://chainid.network) for rich network data and RPC URL
+- [@reown/appkit](https://reown.com/appkit) for wallet connection
