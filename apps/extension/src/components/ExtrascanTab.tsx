@@ -5,7 +5,6 @@ import { getStoredApiKeys } from "../utils/storage";
 export default function ExtrascanTab() {
     const [isExtrapolating, setIsExtrapolating] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const [contractData, setContractData] = useState<CodeDataType | null>(null);
 
     useEffect(() => {
@@ -100,6 +99,7 @@ export default function ExtrascanTab() {
         <div className="p-4">
             <h2 className="text-xl font-bold mb-4">Extrascan</h2>
             {isExtrapolating && <div>Extrapolating ABI...</div>}
+            {contractData && JSON.stringify(contractData)}
         </div>
     );
 }
