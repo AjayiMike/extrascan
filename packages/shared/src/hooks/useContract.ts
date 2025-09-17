@@ -27,7 +27,7 @@ export function useContract<T extends Contract = Contract>(
             const contract = new Contract(
                 address,
                 ABI,
-                withSignerIfPossible ? (signer ?? resilientRpcProvider) : resilientRpcProvider
+                withSignerIfPossible ? signer ?? resilientRpcProvider : resilientRpcProvider
             );
             return contract as T;
         } catch (error) {
