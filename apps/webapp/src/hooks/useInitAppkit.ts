@@ -37,7 +37,7 @@ const getOrDefineAppkitNetwork = (networkData: NetworkDataType): AppKitNetwork |
 };
 
 const metadata = {
-    name: "smartscan",
+    name: "extrascan",
     description: "smart contract ABI extrapolator",
     url: "", // origin must match your domain & subdomain
     icons: [""],
