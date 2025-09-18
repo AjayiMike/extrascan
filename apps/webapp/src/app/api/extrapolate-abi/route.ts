@@ -74,22 +74,22 @@ export async function POST(request: Request) {
             }
         }
 
-        const redisCache = new RedisCache(
-            process.env.REDIS_HOST as string,
-            Number(process.env.REDIS_PORT),
-            process.env.REDIS_PASSWORD as string
-        );
+        // const redisCache = new RedisCache(
+        //     process.env.REDIS_HOST as string,
+        //     Number(process.env.REDIS_PORT),
+        //     process.env.REDIS_PASSWORD as string
+        // );
 
-        const cacheKey = generateCacheKey(CacheKeyPrefix.EXTRAPOLATED, {
-            bytecode,
-            address,
-            networkId,
-        });
+        // const cacheKey = generateCacheKey(CacheKeyPrefix.EXTRAPOLATED, {
+        //     bytecode,
+        //     address,
+        //     networkId,
+        // });
 
-        const cachedData = await redisCache.getCachedData(cacheKey);
-        if (cachedData) {
-            return Response.json(cachedData, { status: 200 });
-        }
+        // const cachedData = await redisCache.getCachedData(cacheKey);
+        // if (cachedData) {
+        //     return Response.json(cachedData, { status: 200 });
+        // }
 
         // Get bytecode either from input or by fetching
         const contractBytecode = bytecode || (await getBytecode(networkId, address));
@@ -148,7 +148,7 @@ export async function POST(request: Request) {
             };
         }
 
-        await redisCache.setCachedData(cacheKey, responseData, 3600);
+        // await redisCache.setCachedData(cacheKey, responseData, 3600);
 
         return Response.json(responseData, { status: 200 });
     } catch (error: any) {

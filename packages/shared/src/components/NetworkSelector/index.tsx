@@ -1,9 +1,8 @@
-"use client";
 import { getNetworkIcon, getNetworkName } from "@/configs/network";
 import { useSupportedNetworkData } from "@/hooks/useSupportedNetworkData";
 import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from "@headlessui/react";
 import { Icon } from "@iconify/react";
-import React, { Fragment, useEffect } from "react";
+import React, { useEffect } from "react";
 import "../../styles/globals.css";
 
 export type NetworkSelectorProps = {
@@ -76,10 +75,10 @@ export const NetworkSelector: React.FC<NetworkSelectorProps> = ({ networkId, han
                 <Icon icon="mdi-light:chevron-down" />
             </button>
 
-            <Transition appear show={networkModalIsOpen} as={Fragment}>
+            <Transition appear show={networkModalIsOpen} as="div">
                 <Dialog as="div" className="relative z-10" onClose={() => setNetworkModalIsOpen(false)}>
                     <TransitionChild
-                        as={Fragment}
+                        as="div"
                         enter="ease-out duration-300"
                         enterFrom="opacity-0"
                         enterTo="opacity-100"
@@ -93,7 +92,7 @@ export const NetworkSelector: React.FC<NetworkSelectorProps> = ({ networkId, han
                     <div className="fixed inset-0 overflow-y-auto">
                         <div className="flex min-h-full items-center justify-center p-4 text-center">
                             <TransitionChild
-                                as={Fragment}
+                                as="div"
                                 enter="ease-out duration-300"
                                 enterFrom="opacity-0 scale-95"
                                 enterTo="opacity-100 scale-100"

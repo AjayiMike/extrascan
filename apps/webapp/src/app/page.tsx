@@ -1,7 +1,6 @@
 "use client";
 
 import ContractDetails from "@/components/ContractDetails";
-import { UniversalDApp } from "@extrascan/shared/components";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { CodeDataType } from "@extrascan/shared/types";
 import { isSupportedNetwork } from "@extrascan/shared/configs";
@@ -10,12 +9,16 @@ import clsx from "clsx";
 import { useQueryState } from "nuqs";
 import { getStoredApiKeys } from "@extrascan/shared/utils";
 import { ModelProvider } from "@extrascan/shared/types";
+import UniversalDApp from "@/components/UniversalDApp";
+import { useAppKitAccount } from "@reown/appkit/react";
 
 export default function Home() {
     const [contractData, setContractData] = useState<CodeDataType | null>(null);
     const [isFetching, setIsFetching] = useState(false);
     const [isExtrapolating, setIsExtrapolating] = useState(false);
     const [error, setError] = useState<string | null>(null);
+
+    const { address: userAddress } = useAppKitAccount();
 
     const [_networkId, setNetworkId] = useQueryState("networkId");
     const [address, setAddress] = useQueryState("address");

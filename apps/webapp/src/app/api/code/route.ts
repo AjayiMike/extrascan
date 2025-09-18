@@ -8,22 +8,22 @@ export async function POST(request: Request) {
     try {
         const { networkId, address } = await request.json();
 
-        const redisCache = new RedisCache(
-            process.env.REDIS_HOST as string,
-            Number(process.env.REDIS_PORT),
-            process.env.REDIS_PASSWORD as string
-        );
+        // const redisCache = new RedisCache(
+        //     process.env.REDIS_HOST as string,
+        //     Number(process.env.REDIS_PORT),
+        //     process.env.REDIS_PASSWORD as string
+        // );
 
-        const cacheKey = generateCacheKey(CacheKeyPrefix.CODE, {
-            address,
-            networkId,
-        });
+        // const cacheKey = generateCacheKey(CacheKeyPrefix.CODE, {
+        //     address,
+        //     networkId,
+        // });
 
-        const cachedData = await redisCache.getCachedData(cacheKey);
+        // const cachedData = await redisCache.getCachedData(cacheKey);
 
-        if (cachedData) {
-            return Response.json(cachedData, { status: 200 });
-        }
+        // if (cachedData) {
+        //     return Response.json(cachedData, { status: 200 });
+        // }
 
         const contractCodeData = await loadCodeFromEtherscan(
             process.env.ETHERSCAN_API_KEY as string,
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
         const responseData = { ...contractCodeData.data, bytecode, startBlock: blockNumber, deployer };
 
         // Store the result in Redis with an expiration time (e.g., 1 hour)
-        await redisCache.setCachedData(cacheKey, responseData, 3600);
+        // await redisCache.setCachedData(cacheKey, responseData, 3600);
         return Response.json(responseData, { status: 200 });
     } catch (error: any) {
         console.debug("an error occured: ", error);

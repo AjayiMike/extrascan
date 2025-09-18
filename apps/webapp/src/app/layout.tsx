@@ -64,7 +64,7 @@ export default function RootLayout({
         <html lang="en">
             <body className={clsx(inter.className, "w-full")}>
                 <Header />
-                <Suspense>
+                <Suspense fallback={<div>Loading...</div>}>
                     <main className="w-full min-h-[calc(100vh-8rem)]">{children}</main>
                 </Suspense>
                 <Footer />

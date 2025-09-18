@@ -1,65 +1,81 @@
-# Extrascan
+# Extrascan Web Application
 
-Extrascan enables interaction with Ethereum smart contracts, whether they are verified or not. It uses AI models to extrapolate ABIs from unverified contract bytecode, making it possible to interact with contracts that aren't verified on block explorers.
+This is the web application component of Extrascan, providing a standalone interface for interacting with Ethereum smart contracts through your browser.
 
-## Features
+## Overview
 
-- Smart contract ABI extraction and interaction
-- Support for unverified contracts through AI-powered ABI extrapolation
-- Multi-network support for Ethereum and compatible chains
-- Interactive contract function calling (read/write)
-- Confidence scores for extrapolated functions
-- Secure API key management
-- Web3 wallet integration
+The web application provides a full-featured interface for:
 
-## Prerequisites
+-   Smart contract analysis and interaction
+-   ABI extrapolation for unverified contracts
+-   Multi-network support
+-   Wallet connection with EIP-6963 support
 
-- Node.js >= 20.12.2
-- Yarn >= 1.22.19
-- Redis server (for caching)
+## Tech Stack
 
-## Installation
+-   [Next.js](https://nextjs.org/) - React framework
+-   [TailwindCSS](https://tailwindcss.com/) - Utility-first CSS
+-   [Ethers.js](https://docs.ethers.org/v6/) - Ethereum library
+-   [React Hook Form](https://react-hook-form.com/) - Form management
+-   [@reown/appkit](https://reown.com/appkit) - Wallet connection
 
-1. Clone the repository:
+## Development Setup
+
+### Prerequisites
+
+-   Node.js >= 20.12.0
+-   pnpm >= 9.14.0
+-   Redis server (for caching)
+
+### Environment Configuration
+
+Create a `.env.local` file in the webapp directory with these variables:
+
+```
+# Block explorer API keys
+ETHERSCAN_API_KEY=your_key_here
+
+# Redis configuration (for API response caching)
+REDIS_HOST=localhost
+REDIS_PORT=6379
+REDIS_PASSWORD=your_password
+
+# Optional AI model keys (can also be set via UI)
+GEMINI_API_KEY=your_key_here
+OPENAI_API_KEY=your_key_here
+ANTHROPIC_API_KEY=your_key_here
+```
+
+### Local Development
+
+1. From the root directory, install dependencies:
 
     ```bash
-    git clone https://github.com/AjayiMike/extrascan.git
-    cd extrascan
+    pnpm install
     ```
 
-2. Install dependencies:
+2. Start the development server:
 
     ```bash
-    yarn install
+    # From root directory
+    pnpm dev:webapp
+
+    # Or from webapp directory
+    pnpm dev
     ```
 
-3. Environment Setup
-
-    Create a `.env` file and paste the content of `.env.example`, then set the values for the following:
-
-    - ETHERSCAN_API_KEY
-    - REDIS_HOST
-    - REDIS_PASSWORD
-    - REDIS_PORT
-
-4. Start the development server:
-
-    ```bash
-    yarn dev
-    ```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser
+3. Open [http://localhost:3000](http://localhost:3000) in your browser
 
 ## AI Model Integration
 
 Currently supported:
 
-- Google Gemini Pro
+-   Google Gemini Pro
 
 Coming soon:
 
-- OpenAI GPT-4
-- Anthropic Claude
+-   OpenAI GPT-4
+-   Anthropic Claude
 
 To use the AI features, you'll need to obtain an API key from Google's AI Studio and add it through the application's API key settings in the app.
 
@@ -67,25 +83,82 @@ To use the AI features, you'll need to obtain an API key from Google's AI Studio
 
 ```
 src/
-├── app/ # Next.js app router
-├── assets/ images
-├── components/ # Reusable UI components
-├── config/ # Configuration files
-├── constant/ # Constant files
-├── hooks/ # Custom React hooks
-├── types/ # TypeScript type definitions
-├── utils/ # Utility functions
-└── views/ # Page-specific components
+├── app/                # Next.js app router
+│   ├── api/            # API routes for ABI extrapolation and contract data
+│   ├── globals.css     # Global styles
+│   ├── layout.tsx      # Root layout component
+│   └── page.tsx        # Home page component
+├── assets/             # Images and static assets
+├── components/         # Reusable UI components
+│   ├── ContractDetails/# Contract interaction components
+│   ├── footer/         # Footer components
+│   ├── header/         # Header and navigation components
+│   └── UniversalDApp/  # Core contract interaction UI
+├── hooks/              # Custom React hooks
+│   └── useInitAppkit.ts# Wallet connection hook
+└── middleware/         # Next.js middleware
 ```
 
-## Contributing
+### Key Components
 
-1. Fork the repository
-2. clone your forked version
-3. Create your feature branch (`git checkout -b feature/amazing-feature`)
-4. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-5. Push to the branch (`git push origin feature/amazing-feature`)
-6. Open a Pull Request
+-   **UniversalDApp**: Core component for contract interaction, handling both verified and unverified contracts
+-   **ContractDetails**: Displays contract information and function interfaces
+-   **API Routes**: Backend logic for ABI extrapolation and contract data fetching
+
+## Building and Deployment
+
+### Building for Production
+
+```bash
+# From root directory
+pnpm build:webapp
+
+# Or from webapp directory
+pnpm build
+```
+
+The build output will be in the `.next` directory.
+
+### Deployment
+
+The web application can be deployed to various platforms:
+
+1. **Vercel** (Recommended)
+
+    - Connect your GitHub repository to Vercel
+    - Configure environment variables
+    - Deploy
+
+2. **Self-hosted**
+    ```bash
+    pnpm build:webapp
+    pnpm start:webapp
+    ```
+
+## Testing
+
+```bash
+# Run tests
+pnpm test
+```
+
+## Troubleshooting
+
+### Common Issues
+
+1. **Redis Connection Issues**
+
+    - Ensure Redis server is running
+    - Check environment variables are set correctly
+
+2. **API Key Issues**
+
+    - Verify API keys are valid
+    - Check rate limits haven't been exceeded
+
+3. **Contract Interaction Failures**
+    - Ensure wallet is connected to the correct network
+    - Verify contract address is valid for the selected network
 
 ## License
 
@@ -93,8 +166,8 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- [WhatsABI](https://github.com/shazow/whatsabi) for bytecode analysis
-- [openchain](https://openchain.xyz) for function signature lookup
-- [Ethers.js](https://docs.ethers.org/v6/) for Ethereum interaction
-- [chainid.network](https://chainid.network) for rich network data and RPC URL
-- [@reown/appkit](https://reown.com/appkit) for wallet connection
+-   [WhatsABI](https://github.com/shazow/whatsabi) for bytecode analysis
+-   [openchain](https://openchain.xyz) for function signature lookup
+-   [Ethers.js](https://docs.ethers.org/v6/) for Ethereum interaction
+-   [chainid.network](https://chainid.network) for rich network data and RPC URL
+-   [@reown/appkit](https://reown.com/appkit) for wallet connection

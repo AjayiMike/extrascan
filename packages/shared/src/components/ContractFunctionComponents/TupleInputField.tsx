@@ -8,6 +8,7 @@ import ArrayInputField from "./ArrayInputField";
 import SimpleInputField from "./SimpleInputField";
 
 export interface TupleInputFieldProps extends Pick<FieldAccordionProps, "onAddClick" | "onRemoveClick" | "index"> {
+    userAddress?: string;
     data: ContractAbiItemInput;
     basePath: string;
     level: number;
@@ -16,6 +17,7 @@ export interface TupleInputFieldProps extends Pick<FieldAccordionProps, "onAddCl
 }
 
 export const TupleInputField: FC<TupleInputFieldProps> = ({
+    userAddress,
     data,
     basePath,
     level,
@@ -40,6 +42,7 @@ export const TupleInputField: FC<TupleInputFieldProps> = ({
                     return (
                         <TupleInputField
                             key={index}
+                            userAddress={userAddress}
                             data={component}
                             basePath={`${basePath}:${index}`}
                             level={level + 1}
@@ -53,6 +56,7 @@ export const TupleInputField: FC<TupleInputFieldProps> = ({
                     return (
                         <ArrayInputField
                             key={index}
+                            userAddress={userAddress}
                             data={component}
                             basePath={`${basePath}:${index}`}
                             level={arrayMatch.itemType === "tuple" ? level + 1 : level}
@@ -64,6 +68,7 @@ export const TupleInputField: FC<TupleInputFieldProps> = ({
                 return (
                     <SimpleInputField
                         key={index}
+                        userAddress={userAddress}
                         data={component}
                         path={`${basePath}:${index}`}
                         isDisabled={isDisabled}

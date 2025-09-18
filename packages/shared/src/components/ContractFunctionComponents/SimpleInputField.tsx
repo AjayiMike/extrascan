@@ -6,10 +6,10 @@ import { useController, useFormContext } from "react-hook-form";
 import { useCallback, useMemo, useRef } from "react";
 import type { ChangeEvent, FC } from "react";
 import clsx from "clsx";
-import { useAppKitAccount } from "@reown/appkit/react";
 import { Icon } from "@iconify/react";
 
 export type SimpleInputFieldProps = {
+    userAddress?: string;
     data: ContractAbiItemInput;
     hideLabel?: boolean;
     path: string;
@@ -20,6 +20,7 @@ export type SimpleInputFieldProps = {
 };
 
 export const SimpleInputField: FC<SimpleInputFieldProps> = ({
+    userAddress,
     data,
     hideLabel,
     path: name,
@@ -28,7 +29,7 @@ export const SimpleInputField: FC<SimpleInputFieldProps> = ({
     isOptional: isOptionalProp,
 }) => {
     const ref = useRef<HTMLInputElement>(null);
-    const { address } = useAppKitAccount();
+    // const { address } = useAppKitAccount();
 
     const isNativeCoin = data.fieldType === "native_coin";
 
@@ -104,9 +105,9 @@ export const SimpleInputField: FC<SimpleInputFieldProps> = ({
                             <Icon icon="mynaui:x-circle-solid" className="h-5 w-5" />
                         </button>
                     )}
-                    {data.type === "address" && Boolean(address) && (
+                    {data.type === "address" && Boolean(userAddress) && (
                         <button
-                            onClick={() => handleAddressButtonClick(address)}
+                            onClick={() => handleAddressButtonClick(userAddress)}
                             disabled={isDisabled}
                             className="py-1 px-2 text-xs rounded-md bg-gray-500 hover:bg-gray-700 text-gray-50"
                         >
